@@ -330,12 +330,15 @@ class MyApp(QWidget):
                 dir  = FileSave[0]+ '\\' + str(i+1) + '.jpg'
                 self.barImageArray[i].save(dir,'JPEG') 
         elif(self.generatedPatternindex == 1): #spot
+            for i in range(len(self.spotImageArray)):
                 dir  = FileSave[0]+ '\\' + str(i+1) + '.jpg'
                 self.spotImageArray[i].save(dir,'JPEG') 
         elif(self.generatedPatternindex == 2): #looming
+            for i in range(len(self.loomingImageArray)):
                 dir  = FileSave[0]+ '\\' + str(i+1) + '.jpg'
                 self.loomingImageArray[i].save(dir,'JPEG') 
         elif(self.generatedPatternindex == 3): #grating
+            for i in range(len(self.gratingImageArray)):
                 dir  = FileSave[0]+ '\\' + str(i+1) + '.jpg'
                 self.gratingImageArray[i].save(dir,'JPEG') 
 
