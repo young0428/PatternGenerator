@@ -45,6 +45,7 @@ DEFAULTGRATINGSPEED = 10
 """
 testsdfsdfsdfsdfdsfsd
 """
+#code modified
 
 class savingChangedImageIndexThread(QThread):
     def __init__(self, parent):
