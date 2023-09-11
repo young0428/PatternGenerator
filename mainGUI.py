@@ -296,10 +296,11 @@ class MyApp(QWidget):
         self.resize(700, 700) # set window size
         self.show()
 
+    ### 수정사항1
     def saveGeneratedPatternasHDF(self):
         if(self.isPatternGenerated == False): return
 
-        FileSave = QFileDialog.getSaveFileName(self, 'Save file', "","HDF file")
+        FileSave = QFileDialog.getSaveFileName(self, 'Save file', "","HDF file")    # <- Here
         f = h5py.File(FileSave[0]+".hdf5", "w")
 
         if(self.generatedPatternindex == 0): #bar
@@ -320,7 +321,7 @@ class MyApp(QWidget):
             f.create_dataset("totalpatternlength", data = self.currenttotalPatternLength)
 
         f.close
-
+        ## test
     def saveGeneratedPatternasSequentialImage(self):
         if(self.isPatternGenerated == False): return
 
