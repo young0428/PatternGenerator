@@ -300,7 +300,8 @@ class MyApp(QWidget):
     def saveGeneratedPatternasHDF(self):
         if(self.isPatternGenerated == False): return
 
-        FileSave = QFileDialog.getSaveFileName(self, 'Save file', "","HDF file")    # <- Here
+
+        FileSave = QFileDialog.getSaveFileName(self, 'Save file', "",tr("HDF file (*.hdf *.h5)"))    # <- Here
         f = h5py.File(FileSave[0]+".hdf5", "w")
 
         if(self.generatedPatternindex == 0): #bar
