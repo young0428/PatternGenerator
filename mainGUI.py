@@ -301,9 +301,13 @@ class MyApp(QWidget):
     def saveGeneratedPatternasHDF(self):
         if(self.isPatternGenerated == False): return
 
+        FileSave = QFileDialog.getSaveFileName(self, 'Save file', "","HDF file (*.h5 *.hdf)")    # <- Here
+        #f = h5py.File(FileSave[0]+".hdf5", "w")
 
-        FileSave = QFileDialog.getSaveFileName(self, 'Save file', "",tr("HDF file (*.hdf *.h5)"))    # <- Here
-        f = h5py.File(FileSave[0]+".hdf5", "w")
+        # End if push cancle button or take empty file name
+        if FileSave[0] == "":
+            return
+        f = h5py.File(FileSave[0], "w")
 
         if(self.generatedPatternindex == 0): #bar
             f.create_dataset("imagedset", data = self.barImagedset)
@@ -350,8 +354,12 @@ class MyApp(QWidget):
     def saveGeneratedPatternasGIF(self):
         if(self.isPatternGenerated == False): return
 
-        FileSave = QFileDialog.getSaveFileName(self, 'Save file', "","gif")
-
+        FileSave = QFileDialog.getSaveFileName(self, 'Save file', "","GIF Image (*.gif)")
+        # End if push cancle button or take empty file name
+        # FileSave[0] == FileName
+        if FileSave[0] == "":
+            return
+        
         if(self.generatedPatternindex == 0): #bar
             gifimageset = copy.deepcopy(self.barImageArray)
         elif(self.generatedPatternindex == 1): #spot
@@ -361,7 +369,7 @@ class MyApp(QWidget):
         elif(self.generatedPatternindex == 3): #grating
             gifimageset = copy.deepcopy(self.gratingImageArray)
                 
-        dir  = FileSave[0] + '.gif'
+        dir  = FileSave[0]
         gifimageset[0].save(dir, save_all=True, append_images=gifimageset[1:], optimize = False, duration = 20, loop=0)
 
 
