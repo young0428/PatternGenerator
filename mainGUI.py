@@ -301,19 +301,19 @@ class MyApp(QWidget):
         f = h5py.File(FileSave[0]+".hdf5", "w")
 
         if(self.generatedPatternindex == 0): #bar
-            f.create_dataset("imagedset", data = self.barImagedset)
+            f.create_dataset("imagedset", data = self.barImagedsetforHDF)
             f.create_dataset("timesequenceNpositiondset", data = self.TimeSequenceNBarLocationdset)
             f.create_dataset("totalpatternlength", data = self.currenttotalPatternLength)
         elif(self.generatedPatternindex == 1): #spot
-            f.create_dataset("imagedset", data = self.spotImagedset)
+            f.create_dataset("imagedset", data = self.spotImagedsetforHDF)
             f.create_dataset("timesequenceNpositiondset", data = self.TimeSequenceNSpotLocationdset)
             f.create_dataset("totalpatternlength", data = self.currenttotalPatternLength)
         elif(self.generatedPatternindex == 2): #looming
-            f.create_dataset("imagedset", data = self.loomingImagedset)
+            f.create_dataset("imagedset", data = self.loomingImagedsetforHDF)
             f.create_dataset("timesequenceNpositiondset", data = self.TimeSequenceNDiscLocationdset)
             f.create_dataset("totalpatternlength", data = self.currenttotalPatternLength)
         elif(self.generatedPatternindex == 3): #grating
-            f.create_dataset("imagedset", data = self.gratingImagedset)
+            f.create_dataset("imagedset", data = self.gratingImagedsetforHDF)
             f.create_dataset("timesequenceNpositiondset", data = self.TimeSequenceNGratingLocationdset)
             f.create_dataset("totalpatternlength", data = self.currenttotalPatternLength)
 
@@ -374,7 +374,6 @@ class MyApp(QWidget):
         if(self.currentActivatedTabIndex == 3): self.generateGratingPattern()
 
 
-
     def generateBarPattern(self):
         if(self.currentBarCnt[0] == 0): return
 
@@ -431,6 +430,8 @@ class MyApp(QWidget):
             self.barImageArray.append(Image.fromarray(self.barImagedset[i]))
             self.barQImageArray.append(qimage2ndarray.array2qimage(self.barImagedset[i], normalize=False))
             self.QPixmapArray.append(QPixmap.fromImage(self.barQImageArray[i]))
+
+        self.barImagedsetforHDF = np.flip(self.barImagedset, axis = 3)
 
 
 
@@ -504,6 +505,9 @@ class MyApp(QWidget):
             self.spotQImageArray.append(qimage2ndarray.array2qimage(self.spotImagedset[i], normalize=False))
             self.QPixmapArray.append(QPixmap.fromImage(self.spotQImageArray[i]))
 
+        self.spotImagedsetforHDF = np.flip(self.spotImagedset, axis = 3)
+
+
     def generateLoomingPattern(self):
         if(self.currentDiscCnt[0] == 0): return
 
@@ -551,6 +555,9 @@ class MyApp(QWidget):
             self.loomingQImageArray.append(qimage2ndarray.array2qimage(self.loomingImagedset[i], normalize=False))
             self.QPixmapArray.append(QPixmap.fromImage(self.loomingQImageArray[i]))
 
+        self.loomingImagedsetforHDF = np.flip(self.loomingImagedset, axis = 3)
+
+
     def generateGratingPattern(self):
 
         self.isPatternGenerated = True
@@ -562,7 +569,7 @@ class MyApp(QWidget):
         self.currentvideoFrameRate = self.video_frame_rate_value[0]
         ncurrentTotalFrame = math.trunc(self.currenttotalPatternLength / 1000 * self.currentvideoFrameRate)
         backgroundColorBGR = self.grating_background_color[::-1]
-        gratingColorBGR = self.grating_color[::-1]
+        gratingColorBGR = self.grating_color
 
         gratingMovementStartTiming = self.grating_movement_start_timing_spin_box_value[0]
         gratingMovementEndTiming = self.grating_movement_end_timing_spin_box_value[0]
@@ -689,6 +696,9 @@ class MyApp(QWidget):
                                 redColor = gratingColorBGR[2] + k / gratingOrBackgroundLength * (backgroundColorBGR[2] - gratingColorBGR[2])
                                 cv2.rectangle(self.gratingImagedset[i],(j-k,0),(j+k,currentDisplayHeight-1),[blueColor,greenColor,redColor],-1)
 
+        print(gratingColorBGR)
+        print(backgroundColorBGR)
+
         self.gratingImageArray = []
         self.gratingQImageArray = []
         self.QPixmapArray = []
@@ -697,6 +707,9 @@ class MyApp(QWidget):
             self.gratingImageArray.append(Image.fromarray(self.gratingImagedset[i]))
             self.gratingQImageArray.append(qimage2ndarray.array2qimage(self.gratingImagedset[i], normalize=False))
             self.QPixmapArray.append(QPixmap.fromImage(self.gratingQImageArray[i]))
+
+        self.gratingImagedsetforHDF = np.flip(self.gratingImagedset, axis = 3)
+
 
 
     def linearFunc(self, currenttime, initpos, finpos, inittime, fintime):
@@ -1146,7 +1159,7 @@ class MyApp(QWidget):
         gratingFundamentalForm = QFormLayout()
         gratingForm = QFormLayout()
 
-        gratingFundamentalForm.addRow("background color : ", gratingBackgroundColorSelectionLayout)
+        gratingFundamentalForm.addRow("background color : ", gratingBackgroundColorSelectionLayout) 
         gratingFundamentalForm.addRow(" total pattern length(ms) : ", self.grating_total_pattern_duration_spin_box)
 
         gratingForm.addRow("grating color : ", gratingColorSelectionLayout)
