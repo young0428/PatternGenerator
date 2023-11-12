@@ -328,6 +328,9 @@ class MyApp(QWidget):
         if(self.isPatternGenerated == False): return
 
         FileSave = QFileDialog.getSaveFileName(self, 'Save file', "","folder")
+        # FileSave[0] == FileName
+        if FileSave[0] == "":
+            return
         os.makedirs(FileSave[0])
 
         if(self.generatedPatternindex == 0): #bar
@@ -376,6 +379,12 @@ class MyApp(QWidget):
         self.ex.show()
 
     def generatePattern(self):
+        if self.video_frame_rate_value[0] > 50:
+            self.save_generated_pattern_as_gif_push_button.setDisabled(True)
+        else:
+            self.save_generated_pattern_as_gif_push_button.setEnabled(True)
+
+
         if(self.currentActivatedTabIndex == 0): self.generateBarPattern()
         if(self.currentActivatedTabIndex == 1): self.generateSpotPattern() 
         if(self.currentActivatedTabIndex == 2): self.generateLoomingPattern()
@@ -1197,8 +1206,12 @@ class MyApp(QWidget):
         self.grating_total_pattern_duration_spin_box_value = [0]
         self.saveSpinBoxValue(self.grating_total_pattern_duration_spin_box, self.grating_total_pattern_duration_spin_box_value)
         self.grating_total_pattern_duration_spin_box.valueChanged.connect(lambda : self.saveSpinBoxValue(self.grating_total_pattern_duration_spin_box, self.grating_total_pattern_duration_spin_box_value))
-        self.grating_total_pattern_duration_spin_box.valueChanged.connect(lambda : self.changeObjectMovementStartTimingRange(self.grating_movement_start_timing_spin_box, self.grating_total_pattern_duration_spin_box_value[0]))
-        self.grating_total_pattern_duration_spin_box.valueChanged.connect(lambda : self.changeObjectMovementEndTimingRange(self.grating_movement_end_timing_spin_box, self.grating_movement_start_timing_spin_box_value[0],self.grating_total_pattern_duration_spin_box_value[0]))
+        #self.grating_total_pattern_duration_spin_box.valueChanged.connect(lambda : self.changeObjectMovementStartTimingRange(self.grating_movement_start_timing_spin_box, self.grating_total_pattern_duration_spin_box_value[0]))
+        #self.grating_total_pattern_duration_spin_box.valueChanged.connect(lambda : self.changeObjectMovementEndTimingRange(self.grating_movement_end_timing_spin_box, self.grating_movement_start_timing_spin_box_value[0],self.grating_total_pattern_duration_spin_box_value[0]))
+
+        self.grating_total_pattern_duration_spin_box.editingFinished.connect(lambda : self.changeObjectMovementStartTimingRange(self.grating_movement_start_timing_spin_box, self.grating_total_pattern_duration_spin_box_value[0]))
+        self.grating_total_pattern_duration_spin_box.editingFinished.connect(lambda : self.changeObjectMovementEndTimingRange(self.grating_movement_end_timing_spin_box, self.grating_movement_start_timing_spin_box_value[0],self.grating_total_pattern_duration_spin_box_value[0]))
+
 
         self.grating_cycle_length_spin_box = QSpinBox()
         self.grating_cycle_length_spin_box.setMinimum(2)
@@ -1220,7 +1233,7 @@ class MyApp(QWidget):
 
         self.grating_movement_start_timing_spin_box = QSpinBox()
         self.grating_movement_start_timing_spin_box.setMinimum(1)
-        self.grating_movement_start_timing_spin_box.setMaximum(DEFAULTENDTIMINGOFTHEBARMOVEMENT)
+        self.grating_movement_start_timing_spin_box.setMaximum(self.grating_total_pattern_duration_spin_box_value[0])
         self.grating_movement_start_timing_spin_box.setValue(DEFAULTSTARTTIMINGOFTHEBARMOVEMENT)
         self.grating_movement_start_timing_spin_box_value = [0]
         self.saveSpinBoxValue(self.grating_movement_start_timing_spin_box, self.grating_movement_start_timing_spin_box_value)
@@ -1407,6 +1420,7 @@ class MyApp(QWidget):
         spinbox.setMaximum(maximumValue)
 
     def changeObjectMovementStartTimingRange(self, spinbox, maximumValue):
+        print(spinbox.maximum())
         spinbox.setMaximum(maximumValue)
 
     def changeBarWidthRange(self):
@@ -1454,14 +1468,8 @@ class MyApp(QWidget):
         self.bar_total_pattern_duration_spin_box_value =[0]
         self.saveSpinBoxValue(self.bar_total_pattern_duration_spin_box, self.bar_total_pattern_duration_spin_box_value)
         self.bar_total_pattern_duration_spin_box.valueChanged.connect(lambda : self.saveSpinBoxValue(self.bar_total_pattern_duration_spin_box, self.bar_total_pattern_duration_spin_box_value))
-        #self.bar_total_pattern_duration_spin_box.valueChanged.connect(lambda : self.changeObjectMovementStartTimingRange(self.bar_movement_start_timing_spin_box, self.bar_total_pattern_duration_spin_box_value[0]))
-        #self.bar_total_pattern_duration_spin_box.valueChanged.connect(lambda : self.changeObjectMovementEndTimingRange(self.bar_movement_end_timing_spin_box, self.bar_movement_start_timing_spin_box_value[0],self.bar_total_pattern_duration_spin_box_value[0]))
-
         self.bar_total_pattern_duration_spin_box.editingFinished.connect(lambda : self.changeObjectMovementStartTimingRange(self.bar_movement_start_timing_spin_box, self.bar_total_pattern_duration_spin_box_value[0]))
         self.bar_total_pattern_duration_spin_box.editingFinished.connect(lambda : self.changeObjectMovementEndTimingRange(self.bar_movement_end_timing_spin_box, self.bar_movement_start_timing_spin_box_value[0],self.bar_total_pattern_duration_spin_box_value[0]))
-
-
-
 
         self.initial_bar_location_spin_box = QSpinBox()
         self.initial_bar_location_spin_box.setMinimum(-1000)
@@ -1491,7 +1499,7 @@ class MyApp(QWidget):
         self.bar_movement_start_timing_spin_box = QSpinBox()
         #self.changeObjectMovementStartTimingRange(self.bar_movement_start_timing_spin_box, self.bar_total_pattern_duration_spin_box_value[0])
         self.bar_movement_start_timing_spin_box.setMinimum(1)
-        self.bar_movement_start_timing_spin_box.setMaximum(DEFAULTENDTIMINGOFTHEBARMOVEMENT)
+        self.bar_movement_start_timing_spin_box.setMaximum(self.bar_total_pattern_duration_spin_box_value[0])
         self.bar_movement_start_timing_spin_box.setValue(DEFAULTSTARTTIMINGOFTHEBARMOVEMENT)
         self.bar_movement_start_timing_spin_box_value = [0]
         self.saveSpinBoxValue(self.bar_movement_start_timing_spin_box, self.bar_movement_start_timing_spin_box_value)
@@ -1582,8 +1590,12 @@ class MyApp(QWidget):
         self.spot_total_pattern_duration_spin_box_value =[0]
         self.saveSpinBoxValue(self.spot_total_pattern_duration_spin_box, self.spot_total_pattern_duration_spin_box_value)
         self.spot_total_pattern_duration_spin_box.valueChanged.connect(lambda : self.saveSpinBoxValue(self.spot_total_pattern_duration_spin_box, self.spot_total_pattern_duration_spin_box_value))
-        self.spot_total_pattern_duration_spin_box.valueChanged.connect(lambda: self.changeObjectMovementStartTimingRange(self.spot_movement_start_timing_spin_box, self.spot_total_pattern_duration_spin_box_value[0]))
-        self.spot_total_pattern_duration_spin_box.valueChanged.connect(lambda : self.changeObjectMovementEndTimingRange(self.spot_movement_end_timing_spin_box, self.spot_movement_start_timing_spin_box_value[0],self.spot_total_pattern_duration_spin_box_value[0]))
+        # self.spot_total_pattern_duration_spin_box.valueChanged.connect(lambda: self.changeObjectMovementStartTimingRange(self.spot_movement_start_timing_spin_box, self.spot_total_pattern_duration_spin_box_value[0]))
+        # self.spot_total_pattern_duration_spin_box.valueChanged.connect(lambda : self.changeObjectMovementEndTimingRange(self.spot_movement_end_timing_spin_box, self.spot_movement_start_timing_spin_box_value[0],self.spot_total_pattern_duration_spin_box_value[0]))
+
+        self.spot_total_pattern_duration_spin_box.editingFinished.connect(lambda: self.changeObjectMovementStartTimingRange(self.spot_movement_start_timing_spin_box, self.spot_total_pattern_duration_spin_box_value[0]))
+        self.spot_total_pattern_duration_spin_box.editingFinished.connect(lambda : self.changeObjectMovementEndTimingRange(self.spot_movement_end_timing_spin_box, self.spot_movement_start_timing_spin_box_value[0],self.spot_total_pattern_duration_spin_box_value[0]))
+
 
         self.spot_width_spin_box = QSpinBox()
         self.spot_width_spin_box.setMinimum(1)
@@ -1640,12 +1652,14 @@ class MyApp(QWidget):
         self.spot_movement_start_timing_spin_box = QSpinBox()
         #self.changeObjectMovementStartTimingRange(self.spot_movement_start_timing_spin_box, self.spot_total_pattern_duration_spin_box_value[0])
         self.spot_movement_start_timing_spin_box.setMinimum(1)
-        self.spot_movement_start_timing_spin_box.setMaximum(DEFAULTENDTIMINGOFTHESPPOTMOVEMENT)
+        self.spot_movement_start_timing_spin_box.setMaximum(self.spot_total_pattern_duration_spin_box_value[0])
         self.spot_movement_start_timing_spin_box.setValue(DEFAULTSTARTTIMINGOFTHESPOTMOVEMENT)
         self.spot_movement_start_timing_spin_box_value = [0]
         self.saveSpinBoxValue(self.spot_movement_start_timing_spin_box, self.spot_movement_start_timing_spin_box_value)
         self.spot_movement_start_timing_spin_box.valueChanged.connect(lambda : self.saveSpinBoxValue(self.spot_movement_start_timing_spin_box, self.spot_movement_start_timing_spin_box_value))
         self.spot_movement_start_timing_spin_box.valueChanged.connect(lambda: self.changeObjectMovementEndTimingRange(self.spot_movement_end_timing_spin_box, self.spot_movement_start_timing_spin_box_value[0], self.spot_total_pattern_duration_spin_box_value[0]))
+        
+
 
 
         self.spot_movement_end_timing_spin_box = QSpinBox()
@@ -1701,6 +1715,11 @@ class MyApp(QWidget):
         self.looming_total_pattern_duration_spin_box_value = [0]
         self.saveSpinBoxValue(self.looming_total_pattern_duration_spin_box, self.looming_total_pattern_duration_spin_box_value)
         self.looming_total_pattern_duration_spin_box.valueChanged.connect(lambda : self.saveSpinBoxValue(self.looming_total_pattern_duration_spin_box, self.looming_total_pattern_duration_spin_box_value))
+        self.looming_total_pattern_duration_spin_box.editingFinished.connect(lambda: self.changeObjectMovementStartTimingRange(self.looming_movement_start_timing_spin_box, self.looming_total_pattern_duration_spin_box_value[0]))
+        self.looming_total_pattern_duration_spin_box.editingFinished.connect(lambda : self.changeObjectMovementEndTimingRange(self.looming_movement_end_timing_spin_box, self.looming_movement_end_timing_spin_box_value[0],self.looming_total_pattern_duration_spin_box_value[0]))
+
+
+        
         #connecting line
 
         self.looming_display_covering_angle_spin_box = QDoubleSpinBox()
@@ -1758,6 +1777,7 @@ class MyApp(QWidget):
         self.looming_movement_start_timing_spin_box_value = [0]
         self.saveSpinBoxValue(self.looming_movement_start_timing_spin_box, self.looming_movement_start_timing_spin_box_value)
         self.looming_movement_start_timing_spin_box.valueChanged.connect(lambda : self.saveSpinBoxValue(self.looming_movement_start_timing_spin_box, self.looming_movement_start_timing_spin_box_value))
+        self.looming_movement_start_timing_spin_box.valueChanged.connect(lambda: self.changeObjectMovementEndTimingRange(self.looming_movement_end_timing_spin_box, self.looming_movement_start_timing_spin_box_value[0], self.looming_total_pattern_duration_spin_box_value[0]))
 
         self.looming_movement_end_timing_spin_box = QSpinBox()
         #setminimum
