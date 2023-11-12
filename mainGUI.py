@@ -48,6 +48,7 @@ DEFAULTGRATINGSPEED = 10
 """
 testsdfsdfsdfsdfdsfsd
 """
+#code modified
 
 class savingChangedImageIndexThread(QThread):
     def __init__(self, parent):
@@ -334,12 +335,15 @@ class MyApp(QWidget):
                 dir  = FileSave[0]+ '\\' + str(i+1) + '.jpg'
                 self.barImageArray[i].save(dir,'JPEG') 
         elif(self.generatedPatternindex == 1): #spot
+            for i in range(len(self.spotImageArray)):
                 dir  = FileSave[0]+ '\\' + str(i+1) + '.jpg'
                 self.spotImageArray[i].save(dir,'JPEG') 
         elif(self.generatedPatternindex == 2): #looming
+            for i in range(len(self.loomingImageArray)):
                 dir  = FileSave[0]+ '\\' + str(i+1) + '.jpg'
                 self.loomingImageArray[i].save(dir,'JPEG') 
         elif(self.generatedPatternindex == 3): #grating
+            for i in range(len(self.gratingImageArray)):
                 dir  = FileSave[0]+ '\\' + str(i+1) + '.jpg'
                 self.gratingImageArray[i].save(dir,'JPEG') 
 
@@ -1100,7 +1104,8 @@ class MyApp(QWidget):
 
         self.grating_cycle_length_spin_box = QSpinBox()
         self.grating_cycle_length_spin_box.setMinimum(2)
-        self.grating_cycle_length_spin_box.setMaximum(DEFAULTDISPLAYERHEIGHT//2)
+        #!!!수정할 것 vertical or horizontal이냐에 따라 cyclelength를 displayerwidth로 할지 displayerheight로 할지 변경할 것!!!
+        self.grating_cycle_length_spin_box.setMaximum(DEFAULTDISPLAYERHEIGHT)
         self.grating_cycle_length_spin_box.setValue(DEFAULTGRATINGCYCLELENGTH)
         self.grating_cycle_length_spin_box_value = [0]
         self.saveSpinBoxValue(self.grating_cycle_length_spin_box, self.grating_cycle_length_spin_box_value)
