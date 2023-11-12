@@ -634,7 +634,7 @@ class MyApp(QWidget):
         self.currenttotalPatternLength = self.grating_total_pattern_duration_spin_box_value[0]
         self.currentvideoFrameRate = self.video_frame_rate_value[0]
         ncurrentTotalFrame = math.trunc(self.currenttotalPatternLength / 1000 * self.currentvideoFrameRate)
-        backgroundColorBGR = self.grating_background_color[::-1]
+        backgroundColorBGR = self.grating_background_color
         gratingColorBGR = self.grating_color
 
         gratingMovementStartTiming = self.grating_movement_start_timing_spin_box_value[0]
@@ -653,7 +653,7 @@ class MyApp(QWidget):
         self.gratingImagedset = np.zeros((ncurrentTotalFrame,currentDisplayHeight,currentDisplayWidth,3), np.uint8)
 
         img = np.zeros((currentDisplayHeight,currentDisplayWidth,3), np.uint8)
-        img[:,:,:] = backgroundColorBGR[::-1]
+        img[:,:,:] = backgroundColorBGR
 
         self.CheckOverTotalDuration(self.currenttotalPatternLength, [[gratingMovementEndTiming]], 0)
 
