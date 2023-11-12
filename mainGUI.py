@@ -791,7 +791,15 @@ class MyApp(QWidget):
 
     def OverTotalDuration(self):
         # edit OverTotalDuration meesage
-        QMessageBox.about(self, 'OverOverOver', 'Message') # <- here
+        button_reply = QMessageBox.information(self, 'Over Title', 'Message') # <- here
+        
+        """
+        # if need reply, use this 
+        button_reply = QMessageBox.information(self, 'OverOverOver', 'Message', QMessageBox.Yes | QMessageBox.Save | ... add somethin ) # <- here
+        if button_reply == QMessageBox.Yes:
+            do something ...
+        elif button_reply == QMessageBox.Save:
+        """
 
 
 
