@@ -686,9 +686,12 @@ class MyApp(QWidget):
                 if(gratingLocationDifference >= 0): #downward
                     for i in range(ncurrentTotalFrame):
                         if(self.TimeSequenceNGratingLocationdset[i,1] < currentDisplayHeight):
-                            grating_midpoint_index_set = set(range(int(self.TimeSequenceNGratingLocationdset[i,1]-1), currentDisplayHeight+gratingCycleLength, gratingCycleLength)).union(set(range(int(self.TimeSequenceNGratingLocationdset[i,1]-1), -gratingCycleLength, -gratingCycleLength)))
+                            grating_midpoint_index_set = set(range(int(self.TimeSequenceNGratingLocationdset[i,1]-1),
+                                                                    currentDisplayHeight+gratingCycleLength, gratingCycleLength)).union(set(range(int(self.TimeSequenceNGratingLocationdset[i,1]-1),
+                                                                                                                                                   -gratingCycleLength, -gratingCycleLength)))
                         else:
-                            grating_midpoint_index_set = set(range(int(self.TimeSequenceNGratingLocationdset[i,1]-1), -gratingCycleLength, -gratingCycleLength)).intersection(set(range(-gratingCycleLength,currentDisplayHeight+gratingCycleLength)))
+                            grating_midpoint_index_set = set(range(int(self.TimeSequenceNGratingLocationdset[i,1]-1), 
+                                                                   -gratingCycleLength, -gratingCycleLength)).intersection(set(range(-gratingCycleLength,currentDisplayHeight+gratingCycleLength)))
                         for j in grating_midpoint_index_set:
                             cv2.rectangle(self.gratingImagedset[i],(0,j-gratingOrBackgroundHalfLength),(currentDisplayWidth-1,j+gratingOrBackgroundHalfLength),gratingColorBGR,-1)
                 else: #upward
