@@ -293,7 +293,8 @@ class MyApp(QWidget):
         #self.setFixedSize(500,600)
         self.resize(700, 700) # set window size
         self.show()
-
+    ## hello ##
+    ### 수정사항1
     def saveGeneratedPatternasHDF(self):
         if(self.isPatternGenerated == False): return
 
