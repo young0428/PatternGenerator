@@ -380,13 +380,10 @@ class MyApp(QWidget):
         self.ex.show()
 
     def generatePattern(self):
-
         if(self.currentActivatedTabIndex == 0): self.generateBarPattern()
         if(self.currentActivatedTabIndex == 1): self.generateSpotPattern() 
         if(self.currentActivatedTabIndex == 2): self.generateLoomingPattern()
         if(self.currentActivatedTabIndex == 3): self.generateGratingPattern()
-
-
 
     def generateBarPattern(self):
         if(self.currentBarCnt[0] == 0): return
@@ -408,6 +405,8 @@ class MyApp(QWidget):
         img = np.zeros((currentDisplayHeight,currentDisplayWidth,3), np.uint8)
         img[:,:,:] = backgroundColorBGR[::-1]
 
+        self.CheckOverTotalDuration(self.currenttotalPatternLength, currentTotalBarPatternInformation, 8)
+
         for i in range(ncurrentTotalFrame):
             self.TimeSequenceNBarLocationdset[i][0] = ('{:.3f}'.format(i / self.currentvideoFrameRate * 1000))
             self.barImagedset[i] = img.copy()
@@ -419,10 +418,18 @@ class MyApp(QWidget):
                     self.TimeSequenceNBarLocationdset[j,i+1] = currentTotalBarPatternInformation[i][4]
             elif(currentTotalBarPatternInformation[i][6] == "sigmoid"):
                 for j in range(ncurrentTotalFrame):
-                    self.TimeSequenceNBarLocationdset[j,i+1] = self.sigmoidFunc(self.TimeSequenceNBarLocationdset[j][0], currentTotalBarPatternInformation[i][4], currentTotalBarPatternInformation[i][5], currentTotalBarPatternInformation[i][7], currentTotalBarPatternInformation[i][8])
+                    self.TimeSequenceNBarLocationdset[j,i+1] = self.sigmoidFunc(self.TimeSequenceNBarLocationdset[j][0], 
+                                                                                currentTotalBarPatternInformation[i][4], 
+                                                                                currentTotalBarPatternInformation[i][5], 
+                                                                                currentTotalBarPatternInformation[i][7], 
+                                                                                currentTotalBarPatternInformation[i][8])
             else:
                 for j in range(ncurrentTotalFrame):
-                    self.TimeSequenceNBarLocationdset[j,i+1] = self.linearFunc(self.TimeSequenceNBarLocationdset[j][0], currentTotalBarPatternInformation[i][4], currentTotalBarPatternInformation[i][5], currentTotalBarPatternInformation[i][7], currentTotalBarPatternInformation[i][8])
+                    self.TimeSequenceNBarLocationdset[j,i+1] = self.linearFunc(self.TimeSequenceNBarLocationdset[j][0], 
+                                                                               currentTotalBarPatternInformation[i][4], 
+                                                                               currentTotalBarPatternInformation[i][5], 
+                                                                               currentTotalBarPatternInformation[i][7], 
+                                                                               currentTotalBarPatternInformation[i][8])
 
         for i in range(len(currentTotalBarPatternInformation)):
             barColorBGR = currentTotalBarPatternInformation[i][1]
@@ -431,10 +438,16 @@ class MyApp(QWidget):
 
             if(currentTotalBarPatternInformation[i][3] == "vertical"):
                 for j in range(ncurrentTotalFrame):
-                    self.barImagedset[j] = cv2.rectangle(self.barImagedset[j],(0,int(self.TimeSequenceNBarLocationdset[j][i+1])-barHalfWidth-1),(currentDisplayWidth-1,int(self.TimeSequenceNBarLocationdset[j][i+1])+barHalfWidth-1),barColorBGR,-1)
+                    self.barImagedset[j] = cv2.rectangle(self.barImagedset[j],
+                                                         (0,int(self.TimeSequenceNBarLocationdset[j][i+1])-barHalfWidth-1),
+                                                         (currentDisplayWidth-1,int(self.TimeSequenceNBarLocationdset[j][i+1])+barHalfWidth-1),
+                                                         barColorBGR,-1)
             else:
                 for j in range(ncurrentTotalFrame):
-                    self.barImagedset[j] = cv2.rectangle(self.barImagedset[j],(int(self.TimeSequenceNBarLocationdset[j][i+1])-barHalfWidth-1,0),(int(self.TimeSequenceNBarLocationdset[j][i+1])+barHalfWidth-1,currentDisplayHeight-1),barColorBGR,-1)
+                    self.barImagedset[j] = cv2.rectangle(self.barImagedset[j],
+                                                         (int(self.TimeSequenceNBarLocationdset[j][i+1])-barHalfWidth-1,0),
+                                                         (int(self.TimeSequenceNBarLocationdset[j][i+1])+barHalfWidth-1,currentDisplayHeight-1),
+                                                         barColorBGR,-1)
                 
         self.barImageArray = []
         self.barQImageArray = []
@@ -468,12 +481,17 @@ class MyApp(QWidget):
         img = np.zeros((currentDisplayHeight,currentDisplayWidth,3), np.uint8)
         img[:,:,:] = backgroundColorBGR[::-1]
 
+        self.CheckOverTotalDuration(self.currenttotalPatternLength, currentTotalSpotPatternInformation, 11)
+
         for i in range(ncurrentTotalFrame):
             self.TimeSequenceNSpotLocationdset[i][0] = ('{:.3f}'.format(i / self.currentvideoFrameRate * 1000))
             self.spotImagedset[i] = img.copy()
 
         for i in range(len(currentTotalSpotPatternInformation)):
-            if(((currentTotalSpotPatternInformation[i][4] == "vertical") and (currentTotalSpotPatternInformation[i][6] == currentTotalSpotPatternInformation[i][8])) or ((currentTotalSpotPatternInformation[i][4] == "horizontal") and (currentTotalSpotPatternInformation[i][5] == currentTotalSpotPatternInformation[i][7]))):
+            if(((currentTotalSpotPatternInformation[i][4] == "vertical") and 
+                (currentTotalSpotPatternInformation[i][6] == currentTotalSpotPatternInformation[i][8])) or 
+                ((currentTotalSpotPatternInformation[i][4] == "horizontal") and 
+                (currentTotalSpotPatternInformation[i][5] == currentTotalSpotPatternInformation[i][7]))):
                 for j in range(ncurrentTotalFrame):
                     if(currentTotalSpotPatternInformation[i][4] == "vertical"):
                         self.TimeSequenceNSpotLocationdset[j,i+1] = currentTotalSpotPatternInformation[i][6]
@@ -482,15 +500,31 @@ class MyApp(QWidget):
             elif(currentTotalSpotPatternInformation[i][9] == "sigmoid"):
                 for j in range(ncurrentTotalFrame):
                     if(currentTotalSpotPatternInformation[i][4] == "vertical"):
-                        self.TimeSequenceNSpotLocationdset[j,i+1] = self.sigmoidFunc(self.TimeSequenceNSpotLocationdset[j][0], currentTotalSpotPatternInformation[i][6], currentTotalSpotPatternInformation[i][8], currentTotalSpotPatternInformation[i][10], currentTotalSpotPatternInformation[i][11])
+                        self.TimeSequenceNSpotLocationdset[j,i+1] = self.sigmoidFunc(self.TimeSequenceNSpotLocationdset[j][0], 
+                                                                                     currentTotalSpotPatternInformation[i][6], 
+                                                                                     currentTotalSpotPatternInformation[i][8], 
+                                                                                     currentTotalSpotPatternInformation[i][10], 
+                                                                                     currentTotalSpotPatternInformation[i][11])
                     else:
-                        self.TimeSequenceNSpotLocationdset[j,i+1] = self.sigmoidFunc(self.TimeSequenceNSpotLocationdset[j][0], currentTotalSpotPatternInformation[i][5], currentTotalSpotPatternInformation[i][7], currentTotalSpotPatternInformation[i][10], currentTotalSpotPatternInformation[i][11])
+                        self.TimeSequenceNSpotLocationdset[j,i+1] = self.sigmoidFunc(self.TimeSequenceNSpotLocationdset[j][0], 
+                                                                                     currentTotalSpotPatternInformation[i][5], 
+                                                                                     currentTotalSpotPatternInformation[i][7], 
+                                                                                     currentTotalSpotPatternInformation[i][10], 
+                                                                                     currentTotalSpotPatternInformation[i][11])
             else:
                 for j in range(ncurrentTotalFrame):
                     if(currentTotalSpotPatternInformation[i][4] == "vertical"):
-                        self.TimeSequenceNSpotLocationdset[j,i+1] = self.linearFunc(self.TimeSequenceNSpotLocationdset[j][0], currentTotalSpotPatternInformation[i][6], currentTotalSpotPatternInformation[i][8], currentTotalSpotPatternInformation[i][10], currentTotalSpotPatternInformation[i][11])
+                        self.TimeSequenceNSpotLocationdset[j,i+1] = self.linearFunc(self.TimeSequenceNSpotLocationdset[j][0], 
+                                                                                    currentTotalSpotPatternInformation[i][6], 
+                                                                                    currentTotalSpotPatternInformation[i][8], 
+                                                                                    currentTotalSpotPatternInformation[i][10], 
+                                                                                    currentTotalSpotPatternInformation[i][11])
                     else:
-                        self.TimeSequenceNSpotLocationdset[j,i+1] = self.linearFunc(self.TimeSequenceNSpotLocationdset[j][0], currentTotalSpotPatternInformation[i][5], currentTotalSpotPatternInformation[i][7], currentTotalSpotPatternInformation[i][10], currentTotalSpotPatternInformation[i][11])
+                        self.TimeSequenceNSpotLocationdset[j,i+1] = self.linearFunc(self.TimeSequenceNSpotLocationdset[j][0], 
+                                                                                    currentTotalSpotPatternInformation[i][5], 
+                                                                                    currentTotalSpotPatternInformation[i][7], 
+                                                                                    currentTotalSpotPatternInformation[i][10], 
+                                                                                    currentTotalSpotPatternInformation[i][11])
 
         for i in range(len(currentTotalSpotPatternInformation)):
             spotColorBGR = currentTotalSpotPatternInformation[i][1]
@@ -503,10 +537,18 @@ class MyApp(QWidget):
 
             if(currentTotalSpotPatternInformation[i][4] == "vertical"):
                 for j in range(ncurrentTotalFrame):
-                    self.spotImagedset[j] = cv2.rectangle(self.spotImagedset[j],(spotInitialXPosition-spotHalfWidth-1,int(self.TimeSequenceNSpotLocationdset[j][i+1])-spotHalfHeight-1),(spotInitialXPosition+spotHalfWidth-1,int(self.TimeSequenceNSpotLocationdset[j][i+1])+spotHalfHeight-1),spotColorBGR,-1)
+                    self.spotImagedset[j] = cv2.rectangle(self.spotImagedset[j],
+                                                          (spotInitialXPosition-spotHalfWidth-1,int(self.TimeSequenceNSpotLocationdset[j][i+1])-spotHalfHeight-1),
+                                                          (spotInitialXPosition+spotHalfWidth-1,int(self.TimeSequenceNSpotLocationdset[j][i+1])+spotHalfHeight-1),
+                                                          spotColorBGR,
+                                                          -1)
             else:
                 for j in range(ncurrentTotalFrame):
-                    self.spotImagedset[j] = cv2.rectangle(self.spotImagedset[j],(int(self.TimeSequenceNSpotLocationdset[j][i+1])-spotHalfWidth-1,spotInitialYPosition-spotHalfHeight-1),(int(self.TimeSequenceNSpotLocationdset[j][i+1])+spotHalfWidth-1,spotInitialYPosition+spotHalfHeight-1),spotColorBGR,-1)
+                    self.spotImagedset[j] = cv2.rectangle(self.spotImagedset[j],
+                                                          (int(self.TimeSequenceNSpotLocationdset[j][i+1])-spotHalfWidth-1,spotInitialYPosition-spotHalfHeight-1),
+                                                          (int(self.TimeSequenceNSpotLocationdset[j][i+1])+spotHalfWidth-1,spotInitialYPosition+spotHalfHeight-1),
+                                                          spotColorBGR,
+                                                          -1)
         
         self.spotImageArray = []
         self.spotQImageArray = []
@@ -538,13 +580,19 @@ class MyApp(QWidget):
         img = np.zeros((currentDisplayHeight,currentDisplayWidth,3), np.uint8)
         img[:,:,:] = backgroundColorBGR[::-1]
 
+        self.CheckOverTotalDuration(self.currenttotalPatternLength, currentTotalDiscPatternInformation, 7)
+
         for i in range(ncurrentTotalFrame):
             self.TimeSequenceNDiscLocationdset[i][0] = ('{:.3f}'.format(i / self.currentvideoFrameRate * 1000))
             self.loomingImagedset[i] = img.copy()
 
         for i in range(len(currentTotalDiscPatternInformation)):
             for j in range(ncurrentTotalFrame):
-                self.TimeSequenceNDiscLocationdset[j,i+1] = self.atanFunc(self.TimeSequenceNDiscLocationdset[j][0], currentTotalDiscPatternInformation[i][4], currentTotalDiscPatternInformation[i][5], currentTotalDiscPatternInformation[i][6], currentTotalDiscPatternInformation[i][7])
+                self.TimeSequenceNDiscLocationdset[j,i+1] = self.atanFunc(self.TimeSequenceNDiscLocationdset[j][0], 
+                                                                          currentTotalDiscPatternInformation[i][4], 
+                                                                          currentTotalDiscPatternInformation[i][5], 
+                                                                          currentTotalDiscPatternInformation[i][6], 
+                                                                          currentTotalDiscPatternInformation[i][7])
 
         for i in range(len(currentTotalDiscPatternInformation)):
             discColorBGR = currentTotalDiscPatternInformation[i][1]
@@ -552,7 +600,10 @@ class MyApp(QWidget):
             discInitialYPosition = currentTotalDiscPatternInformation[i][3]
 
             for j in range(ncurrentTotalFrame):
-                self.loomingImagedset[j] = cv2.circle(self.loomingImagedset[j],(discInitialXPosition-1, discInitialYPosition-1), int(currentDisplayHeight / currentDisplayCoveringAngle / 2 * self.TimeSequenceNDiscLocationdset[j][i+1]), discColorBGR,-1)
+                self.loomingImagedset[j] = cv2.circle(self.loomingImagedset[j],(discInitialXPosition-1, discInitialYPosition-1), 
+                                                      int(currentDisplayHeight / currentDisplayCoveringAngle / 2 * self.TimeSequenceNDiscLocationdset[j][i+1]), 
+                                                      discColorBGR,
+                                                      -1)
                 print(int(currentDisplayHeight / currentDisplayCoveringAngle / 2 * self.TimeSequenceNDiscLocationdset[j][i+1]))
 
         self.loomingImageArray = []
@@ -595,6 +646,8 @@ class MyApp(QWidget):
         img = np.zeros((currentDisplayHeight,currentDisplayWidth,3), np.uint8)
         img[:,:,:] = backgroundColorBGR[::-1]
 
+        self.CheckOverTotalDuration(self.currenttotalPatternLength, [[gratingMovementEndTiming]], 0)
+
         for i in range(ncurrentTotalFrame):
             self.TimeSequenceNGratingLocationdset[i][0] = ('{:.3f}'.format(i / self.currentvideoFrameRate * 1000))
             self.gratingImagedset[i] = img.copy()
@@ -603,15 +656,30 @@ class MyApp(QWidget):
         if(funcForTheGratingPos == "sigmoid"):
             for i in range(ncurrentTotalFrame):
                 if(directionOfTheGratingPos == "vertical"):
-                    self.TimeSequenceNGratingLocationdset[i,1] = self.sigmoidFunc(self.TimeSequenceNGratingLocationdset[i][0], currentDisplayHeight//2, currentDisplayHeight//2 + gratingLocationDifference, gratingMovementStartTiming, gratingMovementEndTiming)
+                    self.TimeSequenceNGratingLocationdset[i,1] = self.sigmoidFunc(self.TimeSequenceNGratingLocationdset[i][0], 
+                                                                                  currentDisplayHeight//2, 
+                                                                                  currentDisplayHeight//2 + gratingLocationDifference, 
+                                                                                  gratingMovementStartTiming, 
+                                                                                  gratingMovementEndTiming)
                 else:
-                    self.TimeSequenceNGratingLocationdset[i,1] = self.sigmoidFunc(self.TimeSequenceNGratingLocationdset[i][0], currentDisplayWidth//2, currentDisplayWidth//2 + gratingLocationDifference, gratingMovementStartTiming, gratingMovementEndTiming)
+                    self.TimeSequenceNGratingLocationdset[i,1] = self.sigmoidFunc(self.TimeSequenceNGratingLocationdset[i][0], 
+                                                                                  currentDisplayWidth//2, 
+                                                                                  currentDisplayWidth//2 + gratingLocationDifference, 
+                                                                                  gratingMovementStartTiming, 
+                                                                                  gratingMovementEndTiming)
         else:
             for i in range(ncurrentTotalFrame):
                 if(directionOfTheGratingPos == "vertical"):
-                    self.TimeSequenceNGratingLocationdset[i,1] = self.linearFunc(self.TimeSequenceNGratingLocationdset[i][0], currentDisplayHeight//2, currentDisplayHeight//2 + gratingLocationDifference, gratingMovementStartTiming, gratingMovementEndTiming)
+                    self.TimeSequenceNGratingLocationdset[i,1] = self.linearFunc(self.TimeSequenceNGratingLocationdset[i][0], 
+                                                                                 currentDisplayHeight//2, currentDisplayHeight//2 + 
+                                                                                 gratingLocationDifference, gratingMovementStartTiming, 
+                                                                                 gratingMovementEndTiming)
                 else:
-                    self.TimeSequenceNGratingLocationdset[i,1] = self.linearFunc(self.TimeSequenceNGratingLocationdset[i][0], currentDisplayWidth//2, currentDisplayWidth//2 + gratingLocationDifference, gratingMovementStartTiming, gratingMovementEndTiming)
+                    self.TimeSequenceNGratingLocationdset[i,1] = self.linearFunc(self.TimeSequenceNGratingLocationdset[i][0], 
+                                                                                 currentDisplayWidth//2, currentDisplayWidth//2 + 
+                                                                                 gratingLocationDifference, 
+                                                                                 gratingMovementStartTiming, 
+                                                                                 gratingMovementEndTiming)
 
         if(shapeOfTheGrating == "square"):
             if(directionOfTheGratingPos == "vertical"): #vertical
@@ -710,6 +778,21 @@ class MyApp(QWidget):
             self.gratingImageArray.append(Image.fromarray(self.gratingImagedset[i]))
             self.gratingQImageArray.append(qimage2ndarray.array2qimage(self.gratingImagedset[i], normalize=False))
             self.QPixmapArray.append(QPixmap.fromImage(self.gratingQImageArray[i]))
+
+
+    def CheckOverTotalDuration(self, total_pattern_duration, elements_info, endtime_idx):
+        over_endtime_flag = False
+        for element in elements_info:
+            if element[endtime_idx] > total_pattern_duration :
+                over_endtime_flag = True
+        
+        if over_endtime_flag :
+            self.OverTotalDuration()
+
+    def OverTotalDuration(self):
+        # edit OverTotalDuration meesage
+        QMessageBox.about(self, 'OverOverOver', 'Message') # <- here
+
 
 
     def linearFunc(self, currenttime, initpos, finpos, inittime, fintime):
