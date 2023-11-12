@@ -13,10 +13,6 @@ import cv2
 import h5py
 import qimage2ndarray
 
-"""
-adsfsd
-"""
-
 DEFAULTDISPLAYERWIDTHRANGE = 10000
 DEFAULTDISPLAYERHEIGHTRANGE = 10000
 DEFAULTFRAMERATERANGE = 120
@@ -397,13 +393,13 @@ class MyApp(QWidget):
         self.currentvideoFrameRate = self.video_frame_rate_value[0]
         ncurrentTotalFrame =   math.trunc(self.currenttotalPatternLength / 1000 * self.currentvideoFrameRate)
         currentTotalBarPatternInformation= self.totalBarInformation
-        backgroundColorBGR = self.bar_background_color[::-1]
+        backgroundColorBGR = self.bar_background_color
 
         self.TimeSequenceNBarLocationdset = np.zeros((ncurrentTotalFrame,1+len(currentTotalBarPatternInformation)),np.float32)
         self.barImagedset = np.zeros((ncurrentTotalFrame,currentDisplayHeight,currentDisplayWidth,3), np.uint8)
 
         img = np.zeros((currentDisplayHeight,currentDisplayWidth,3), np.uint8)
-        img[:,:,:] = backgroundColorBGR[::-1]
+        img[:,:,:] = backgroundColorBGR
 
         self.CheckOverTotalDuration(self.currenttotalPatternLength, currentTotalBarPatternInformation, 8)
 
@@ -473,13 +469,13 @@ class MyApp(QWidget):
         self.currentvideoFrameRate = self.video_frame_rate_value[0]
         ncurrentTotalFrame = math.trunc(self.currenttotalPatternLength / 1000 * self.currentvideoFrameRate)
         currentTotalSpotPatternInformation= self.totalSpotInformation
-        backgroundColorBGR = self.spot_background_color[::-1]
+        backgroundColorBGR = self.spot_background_color
 
         self.TimeSequenceNSpotLocationdset = np.zeros((ncurrentTotalFrame,1+len(currentTotalSpotPatternInformation)),np.float32)
         self.spotImagedset = np.zeros((ncurrentTotalFrame,currentDisplayHeight,currentDisplayWidth,3), np.uint8)
 
         img = np.zeros((currentDisplayHeight,currentDisplayWidth,3), np.uint8)
-        img[:,:,:] = backgroundColorBGR[::-1]
+        img[:,:,:] = backgroundColorBGR
 
         self.CheckOverTotalDuration(self.currenttotalPatternLength, currentTotalSpotPatternInformation, 11)
 
@@ -572,13 +568,13 @@ class MyApp(QWidget):
         self.currentvideoFrameRate = self.video_frame_rate_value[0]
         ncurrentTotalFrame = math.trunc(self.currenttotalPatternLength / 1000 * self.currentvideoFrameRate)
         currentTotalDiscPatternInformation= self.totalDiscInformation
-        backgroundColorBGR = self.looming_background_color[::-1]
+        backgroundColorBGR = self.looming_background_color
 
         self.TimeSequenceNDiscLocationdset = np.zeros((ncurrentTotalFrame,1+len(currentTotalDiscPatternInformation)),np.float32)
         self.loomingImagedset = np.zeros((ncurrentTotalFrame,currentDisplayHeight,currentDisplayWidth,3), np.uint8)
 
         img = np.zeros((currentDisplayHeight,currentDisplayWidth,3), np.uint8)
-        img[:,:,:] = backgroundColorBGR[::-1]
+        img[:,:,:] = backgroundColorBGR
 
         self.CheckOverTotalDuration(self.currenttotalPatternLength, currentTotalDiscPatternInformation, 7)
 
@@ -1797,8 +1793,12 @@ class MyApp(QWidget):
 
         if col.isValid():
             color_frame.setStyleSheet('QWidget { background-color: %s }' % col.name())
+            colorRGBValue[:] = [col.red(),col.green(),col.blue()]
+        else:
+            col = QColor(*colorRGBValue)
         
-        colorRGBValue[:] = [col.red(),col.green(),col.blue()]
+        color_frame.setStyleSheet('QWidget { background-color: %s }' % col.name())
+
 
     def saveSpinBoxValue(self, spinBox, spinBoxValue):
         spinBoxValue[0] = spinBox.value()
