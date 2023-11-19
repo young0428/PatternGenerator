@@ -1237,8 +1237,8 @@ class MyApp(QWidget):
         self.grating_movement_start_timing_spin_box.setValue(DEFAULTSTARTTIMINGOFTHEBARMOVEMENT)
         self.grating_movement_start_timing_spin_box_value = [0]
         self.saveSpinBoxValue(self.grating_movement_start_timing_spin_box, self.grating_movement_start_timing_spin_box_value)
-        self.grating_movement_start_timing_spin_box.valueChanged.connect(lambda : self.saveSpinBoxValue(self.grating_movement_start_timing_spin_box, self.grating_movement_start_timing_spin_box_value))
-        self.grating_movement_start_timing_spin_box.valueChanged.connect(lambda: self.changeObjectMovementEndTimingRange(self.grating_movement_end_timing_spin_box, self.grating_movement_start_timing_spin_box_value[0], self.grating_total_pattern_duration_spin_box_value[0]))
+        self.grating_movement_start_timing_spin_box.editingFinished.connect(lambda : self.saveSpinBoxValue(self.grating_movement_start_timing_spin_box, self.grating_movement_start_timing_spin_box_value))
+        self.grating_movement_start_timing_spin_box.editingFinished.connect(lambda: self.changeObjectMovementEndTimingValue(self.grating_movement_end_timing_spin_box, self.grating_movement_start_timing_spin_box_value[0]))
 
         self.grating_movement_end_timing_spin_box = QSpinBox()
         self.grating_movement_end_timing_spin_box.setMinimum(DEFAULTSTARTTIMINGOFTHEBARMOVEMENT)
@@ -1246,8 +1246,8 @@ class MyApp(QWidget):
         self.grating_movement_end_timing_spin_box.setValue(DEFAULTENDTIMINGOFTHEBARMOVEMENT)
         self.grating_movement_end_timing_spin_box_value = [0]
         self.saveSpinBoxValue(self.grating_movement_end_timing_spin_box, self.grating_movement_end_timing_spin_box_value)
-        self.grating_movement_end_timing_spin_box.valueChanged.connect(lambda : self.saveSpinBoxValue(self.grating_movement_end_timing_spin_box, self.grating_movement_end_timing_spin_box_value))
-        self.grating_movement_end_timing_spin_box.valueChanged.connect(lambda : self.changeObjectMovementStartTimingRange(self.grating_movement_end_timing_spin_box, self.grating_movement_end_timing_spin_box_value[0]))
+        self.grating_movement_end_timing_spin_box.editingFinished.connect(lambda : self.saveSpinBoxValue(self.grating_movement_end_timing_spin_box, self.grating_movement_end_timing_spin_box_value))
+        self.grating_movement_end_timing_spin_box.editingFinished.connect(lambda : self.changeObjectMovementStartTimingValue(self.grating_movement_start_timing_spin_box, self.grating_movement_end_timing_spin_box_value[0]))
 
         self.grating_background_color_push_button = QPushButton('select color')
         self.grating_background_color_frame = QFrame()
@@ -1420,9 +1420,7 @@ class MyApp(QWidget):
         spinbox.setMaximum(maximumValue)
 
     def changeObjectMovementStartTimingRange(self, spinbox, maximumValue):
-        
         spinbox.setMaximum(maximumValue)
-        print(spinbox.maximum())
 
     def changeObjectMovementStartTimingValue(self, spinbox, maximum):
         if spinbox.value() > maximum:
@@ -1666,8 +1664,8 @@ class MyApp(QWidget):
         self.spot_movement_start_timing_spin_box.setValue(DEFAULTSTARTTIMINGOFTHESPOTMOVEMENT)
         self.spot_movement_start_timing_spin_box_value = [0]
         self.saveSpinBoxValue(self.spot_movement_start_timing_spin_box, self.spot_movement_start_timing_spin_box_value)
-        self.spot_movement_start_timing_spin_box.valueChanged.connect(lambda : self.saveSpinBoxValue(self.spot_movement_start_timing_spin_box, self.spot_movement_start_timing_spin_box_value))
-        self.spot_movement_start_timing_spin_box.valueChanged.connect(lambda: self.changeObjectMovementEndTimingRange(self.spot_movement_end_timing_spin_box, self.spot_movement_start_timing_spin_box_value[0], self.spot_total_pattern_duration_spin_box_value[0]))
+        self.spot_movement_start_timing_spin_box.editingFinished.connect(lambda : self.saveSpinBoxValue(self.spot_movement_start_timing_spin_box, self.spot_movement_start_timing_spin_box_value))
+        self.spot_movement_start_timing_spin_box.editingFinished.connect(lambda: self.changeObjectMovementEndTimingValue(self.spot_movement_end_timing_spin_box, self.spot_movement_start_timing_spin_box_value[0]))
         
 
 
@@ -1679,8 +1677,8 @@ class MyApp(QWidget):
         self.spot_movement_end_timing_spin_box.setValue(DEFAULTENDTIMINGOFTHESPPOTMOVEMENT)
         self.spot_movement_end_timing_spin_box_value =[0]
         self.saveSpinBoxValue(self.spot_movement_end_timing_spin_box, self.spot_movement_end_timing_spin_box_value)
-        self.spot_movement_end_timing_spin_box.valueChanged.connect(lambda : self.saveSpinBoxValue(self.spot_movement_end_timing_spin_box, self.spot_movement_end_timing_spin_box_value))
-        self.spot_movement_end_timing_spin_box.valueChanged.connect(lambda : self.changeObjectMovementStartTimingRange(self.spot_movement_start_timing_spin_box, self.spot_movement_end_timing_spin_box_value[0]))
+        self.spot_movement_end_timing_spin_box.editingFinished.connect(lambda : self.saveSpinBoxValue(self.spot_movement_end_timing_spin_box, self.spot_movement_end_timing_spin_box_value))
+        self.spot_movement_end_timing_spin_box.editingFinished.connect(lambda : self.changeObjectMovementStartTimingValue(self.spot_movement_start_timing_spin_box, self.spot_movement_end_timing_spin_box_value[0]))
 
 
         self.spot_background_color_push_button = QPushButton('select color')
@@ -1786,8 +1784,8 @@ class MyApp(QWidget):
         #setvalue
         self.looming_movement_start_timing_spin_box_value = [0]
         self.saveSpinBoxValue(self.looming_movement_start_timing_spin_box, self.looming_movement_start_timing_spin_box_value)
-        self.looming_movement_start_timing_spin_box.valueChanged.connect(lambda : self.saveSpinBoxValue(self.looming_movement_start_timing_spin_box, self.looming_movement_start_timing_spin_box_value))
-        self.looming_movement_start_timing_spin_box.valueChanged.connect(lambda: self.changeObjectMovementEndTimingRange(self.looming_movement_end_timing_spin_box, self.looming_movement_start_timing_spin_box_value[0], self.looming_total_pattern_duration_spin_box_value[0]))
+        self.looming_movement_start_timing_spin_box.editingFinished.connect(lambda : self.saveSpinBoxValue(self.looming_movement_start_timing_spin_box, self.looming_movement_start_timing_spin_box_value))
+        self.looming_movement_start_timing_spin_box.editingFinished.connect(lambda: self.changeObjectMovementEndTimingValue(self.looming_movement_end_timing_spin_box, self.looming_movement_start_timing_spin_box_value[0]))
 
         self.looming_movement_end_timing_spin_box = QSpinBox()
         #setminimum
@@ -1795,7 +1793,8 @@ class MyApp(QWidget):
         #setvalue
         self.looming_movement_end_timing_spin_box_value = [0]
         self.saveSpinBoxValue(self.looming_movement_end_timing_spin_box, self.looming_movement_end_timing_spin_box_value)
-        self.looming_movement_end_timing_spin_box.valueChanged.connect(lambda : self.saveSpinBoxValue(self.looming_movement_end_timing_spin_box, self.looming_movement_end_timing_spin_box_value))
+        self.looming_movement_end_timing_spin_box.editingFinished.connect(lambda : self.saveSpinBoxValue(self.looming_movement_end_timing_spin_box, self.looming_movement_end_timing_spin_box_value))
+        self.looming_movement_end_timing_spin_box.editingFinished.connect(lambda : self.changeObjectMovementStartTimingValue(self.looming_movement_start_timing_spin_box, self.looming_movement_end_timing_spin_box_value[0]))
 
         self.looming_background_color_push_button = QPushButton('select color')
         self.looming_background_color_frame = QFrame()
