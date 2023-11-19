@@ -206,85 +206,31 @@ class MyApp(QWidget):
 
     def initUI(self):
 
-        self.firstRowLayout = QHBoxLayout()
-        self.secondRowLayout = QHBoxLayout()
-        self.thirdRowLayout = QVBoxLayout()
-
-        self.mainLayout = QVBoxLayout()
-
-        #designing firstRowLayout
         
-        size_n_frame_rate_group_box = QGroupBox('Displayer size and Video frame rate')
+        self.mainLayout = QVBoxLayout()
+        self.generatorLayout = QVBoxLayout()
+        self.generator_type_tab = QTabWidget()
+        
+        #videoTab = self.createVideoTab()
+        patternTab = self.createPatternTab()
+        videoTab = self.createVideoTab()
+        
 
-        size_n_frame_rate_group_box.setLayout(self.createSizeNFrameRateGroupBoxFormLayout())
+        self.currentActivatedGeneratorTabIndex = 0
+        self.generator_type_tab.currentChanged.connect(lambda : self.saveActivatedGeneratorTab())
+        self.generator_type_tab.addTab(patternTab, "Pattern")
+        self.generator_type_tab.addTab(videoTab, "Video")
 
-        self.firstRowLayout.addWidget(size_n_frame_rate_group_box)
+        self.generatorLayout.addWidget(self.generator_type_tab)
 
-
-        #designing secondRowLayout
-        self.pattern_type_tab = QTabWidget()
-
-        barTab = self.createBarTab()
-        spotTab = self.createSpotTab()
-        loomingTab = self.createLoomingTab()
-        gratingTab = self.createGratingTab()
-
-        self.currentActivatedTabIndex = 0
-        self.pattern_type_tab.currentChanged.connect(lambda : self.saveActivatedTab())
-
-        self.pattern_type_tab.addTab(barTab,"Bar")
-        self.pattern_type_tab.addTab(spotTab,"Spot")
-        self.pattern_type_tab.addTab(loomingTab, "Looming")
-        self.pattern_type_tab.addTab(gratingTab, "Grating")
-
-
-        self.secondRowLayout.addWidget(self.pattern_type_tab)
-
-        self.isPatternGenerated = False
-        self.generatedPatternindex = -1
-
-        self.generate_pattern_push_button = QPushButton('Generate Pattern')
-        self.generate_pattern_push_button.setFixedHeight(30)
-        self.generate_pattern_push_button.setFont(QFont("Arial", 13, QFont.Bold, italic=False))
-        self.generate_pattern_push_button.clicked.connect(lambda : self.generatePattern())
-
-        self.show_generated_pattern_push_button = QPushButton('Show Generated Pattern')
-        self.show_generated_pattern_push_button.setFixedHeight(30)
-        self.show_generated_pattern_push_button.setFont(QFont("Arial", 13, QFont.Bold, italic=False))
-        self.show_generated_pattern_push_button.clicked.connect(lambda : self.showGeneratedPattern())
-
-        self.saveDataRowLayout = QHBoxLayout()
-
-        self.save_generated_pattern_as_hdf_push_button = QPushButton('Save as HDF5')
-        self.save_generated_pattern_as_hdf_push_button.setFixedHeight(30)
-        self.save_generated_pattern_as_hdf_push_button.setFont(QFont("Arial", 13, QFont.Bold, italic=False))
-        self.save_generated_pattern_as_hdf_push_button.clicked.connect(lambda : self.saveGeneratedPatternasHDF())
-
-
-        self.save_generated_pattern_as_sequential_image_push_button = QPushButton('Save as Sequential Image')
-        self.save_generated_pattern_as_sequential_image_push_button.setFixedHeight(30)
-        self.save_generated_pattern_as_sequential_image_push_button.setFont(QFont("Arial", 13, QFont.Bold, italic=False))
-        self.save_generated_pattern_as_sequential_image_push_button.clicked.connect(lambda : self.saveGeneratedPatternasSequentialImage())
-
-        self.save_generated_pattern_as_gif_push_button = QPushButton('Save as GIF')
-        self.save_generated_pattern_as_gif_push_button.setFixedHeight(30)
-        self.save_generated_pattern_as_gif_push_button.setFont(QFont("Arial", 13, QFont.Bold, italic=False))
-        self.save_generated_pattern_as_gif_push_button.clicked.connect(lambda : self.saveGeneratedPatternasGIF())
-
-        self.saveDataRowLayout.addWidget(self.save_generated_pattern_as_hdf_push_button)
-        self.saveDataRowLayout.addWidget(self.save_generated_pattern_as_sequential_image_push_button)
-        self.saveDataRowLayout.addWidget(self.save_generated_pattern_as_gif_push_button)
-
-        self.thirdRowLayout.addWidget(self.generate_pattern_push_button)
-        self.thirdRowLayout.addWidget(self.show_generated_pattern_push_button)
-        self.thirdRowLayout.addLayout(self.saveDataRowLayout)
+        
 
 
         #alginment of layouts
-        self.mainLayout.addLayout(self.firstRowLayout)
-        self.mainLayout.addLayout(self.secondRowLayout)
-        self.mainLayout.addLayout(self.thirdRowLayout)
+        
 
+        #self.setLayout(self.mainLayout)
+        self.mainLayout.addLayout(self.generatorLayout)
         self.setLayout(self.mainLayout)
 
         #set window format
@@ -887,6 +833,9 @@ class MyApp(QWidget):
 
     def saveActivatedTab(self):
         self.currentActivatedTabIndex = self.pattern_type_tab.currentIndex()
+    
+    def saveActivatedGeneratorTab(self):
+        self.currentActivatedGeneratorTabIndex = self.generator_type_tab.currentIndex()
 
     def createSizeNFrameRateGroupBoxFormLayout(self):
         sizeNFrameRateGroupBoxFormLayout = QFormLayout()
@@ -930,6 +879,137 @@ class MyApp(QWidget):
         sizeNFrameRateGroupBoxFormLayout.addRow("video frame rate : ", self.video_frame_rate_spin_box)
 
         return sizeNFrameRateGroupBoxFormLayout
+
+    def createVideoTab(self):
+        videoGenerateLayout = QVBoxLayout()
+
+        # add input & output path
+        pathFormLayout = self.createVideoFormLayout()
+        videoGenerateLayout.addLayout(pathFormLayout)
+        
+
+
+        widget = QWidget()
+        widget.setLayout(videoGenerateLayout)
+        return widget
+
+
+
+    def createVideoFormLayout(self):
+        pathFormLayout = QFormLayout()
+        
+        input_video_path_layout, self.input_video_line_edit, self.input_video_push_button = self.pathLineEditLayout()
+        output_video_path_layout, self.output_video_line_edit, self.input_video_push_button = self.pathLineEditLayout()
+        
+
+        pathFormLayout.addRow("Input video path  ", input_video_path_layout)
+        pathFormLayout.addRow("Output video path ", output_video_path_layout)
+
+        return pathFormLayout
+
+    def pathLineEditLayout(self):
+        hboxlayout = QHBoxLayout()
+        input_video_path_line_edit = QLineEdit()
+        input_video_push_button = QPushButton("...")
+        input_video_push_button.clicked.connect(lambda : self.getVideoFilePath(input_video_path_line_edit))
+        hboxlayout.addWidget(input_video_path_line_edit)
+        hboxlayout.addWidget(input_video_push_button)
+
+        return hboxlayout, input_video_path_line_edit, input_video_push_button
+
+    def getVideoFilePath(self,path_line_edit):
+        path = QFileDialog.getOpenFileName(self, '','','Video file (*.mp4)')
+        # does not select file
+        if not path[0]:
+            return
+        
+        path_line_edit.setText(path[0])
+        
+
+    def createPatternTab(self):
+        patternGenerateLayout = QVBoxLayout()
+        firstRowLayout = QHBoxLayout()
+        secondRowLayout = QHBoxLayout()
+        thirdRowLayout = QVBoxLayout()
+        
+        #designing firstRowLayout
+        
+        size_n_frame_rate_group_box = QGroupBox('Displayer size and Video frame rate')
+
+        size_n_frame_rate_group_box.setLayout(self.createSizeNFrameRateGroupBoxFormLayout())
+
+        firstRowLayout.addWidget(size_n_frame_rate_group_box)
+
+
+        #designing secondRowLayout
+
+        self.pattern_type_tab = QTabWidget()
+
+        barTab = self.createBarTab()
+        spotTab = self.createSpotTab()
+        loomingTab = self.createLoomingTab()
+        gratingTab = self.createGratingTab()
+
+        self.currentActivatedTabIndex = 0
+        self.pattern_type_tab.currentChanged.connect(lambda : self.saveActivatedTab())
+
+        self.pattern_type_tab.addTab(barTab,"Bar")
+        self.pattern_type_tab.addTab(spotTab,"Spot")
+        self.pattern_type_tab.addTab(loomingTab, "Looming")
+        self.pattern_type_tab.addTab(gratingTab, "Grating")
+
+
+        secondRowLayout.addWidget(self.pattern_type_tab)
+
+        isPatternGenerated = False
+        generatedPatternindex = -1
+
+        self.generate_pattern_push_button = QPushButton('Generate Pattern')
+        self.generate_pattern_push_button.setFixedHeight(30)
+        self.generate_pattern_push_button.setFont(QFont("Arial", 13, QFont.Bold, italic=False))
+        self.generate_pattern_push_button.clicked.connect(lambda : self.generatePattern())
+
+        self.show_generated_pattern_push_button = QPushButton('Show Generated Pattern')
+        self.show_generated_pattern_push_button.setFixedHeight(30)
+        self.show_generated_pattern_push_button.setFont(QFont("Arial", 13, QFont.Bold, italic=False))
+        self.show_generated_pattern_push_button.clicked.connect(lambda : self.showGeneratedPattern())
+
+        self.saveDataRowLayout = QHBoxLayout()
+
+        self.save_generated_pattern_as_hdf_push_button = QPushButton('Save as HDF5')
+        self.save_generated_pattern_as_hdf_push_button.setFixedHeight(30)
+        self.save_generated_pattern_as_hdf_push_button.setFont(QFont("Arial", 13, QFont.Bold, italic=False))
+        self.save_generated_pattern_as_hdf_push_button.clicked.connect(lambda : self.saveGeneratedPatternasHDF())
+
+
+        self.save_generated_pattern_as_sequential_image_push_button = QPushButton('Save as Sequential Image')
+        self.save_generated_pattern_as_sequential_image_push_button.setFixedHeight(30)
+        self.save_generated_pattern_as_sequential_image_push_button.setFont(QFont("Arial", 13, QFont.Bold, italic=False))
+        self.save_generated_pattern_as_sequential_image_push_button.clicked.connect(lambda : self.saveGeneratedPatternasSequentialImage())
+
+        self.save_generated_pattern_as_gif_push_button = QPushButton('Save as GIF')
+        self.save_generated_pattern_as_gif_push_button.setFixedHeight(30)
+        self.save_generated_pattern_as_gif_push_button.setFont(QFont("Arial", 13, QFont.Bold, italic=False))
+        self.save_generated_pattern_as_gif_push_button.clicked.connect(lambda : self.saveGeneratedPatternasGIF())
+
+        self.saveDataRowLayout.addWidget(self.save_generated_pattern_as_hdf_push_button)
+        self.saveDataRowLayout.addWidget(self.save_generated_pattern_as_sequential_image_push_button)
+        self.saveDataRowLayout.addWidget(self.save_generated_pattern_as_gif_push_button)
+
+        thirdRowLayout.addWidget(self.generate_pattern_push_button)
+        thirdRowLayout.addWidget(self.show_generated_pattern_push_button)
+        thirdRowLayout.addLayout(self.saveDataRowLayout)
+
+        patternGenerateLayout.addLayout(firstRowLayout)
+        patternGenerateLayout.addLayout(secondRowLayout)
+        patternGenerateLayout.addLayout(thirdRowLayout)
+        #self.generatorLayout.addLayout(patternGenerateLayout)
+
+
+        widget = QWidget()
+        widget.setLayout(patternGenerateLayout)
+
+        return widget
 
     def createBarTab(self):
         mainvbox = QVBoxLayout()
