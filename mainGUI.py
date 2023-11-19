@@ -6,6 +6,7 @@ from PyQt5.QtCore import *
 import os
 import copy
 import numpy as np
+from PIL import Image
 import math
 from datetime import datetime
 from PIL import Image
@@ -45,7 +46,6 @@ DEFAULTFINALDISCRADIUS = 120
 
 DEFAULTGRATINGCYCLELENGTH = 70
 DEFAULTGRATINGLOCATIONDIFFERENCE = 49
-
 
 class savingChangedImageIndexThread(QThread):
     def __init__(self, parent):
@@ -881,16 +881,43 @@ class MyApp(QWidget):
         return sizeNFrameRateGroupBoxFormLayout
 
     def createVideoTab(self):
-        videoGenerateLayout = QVBoxLayout()
+        self.videoGenerateLayout = QVBoxLayout()
 
         # add input & output path
+        
         pathFormLayout = self.createVideoFormLayout()
-        videoGenerateLayout.addLayout(pathFormLayout)
+        
+        self.videoPathGroupBox = QGroupBox('File path')
+        self.videoPathGroupBox.setFixedHeight(100)
+        self.videoPathGroupBox.setLayout(pathFormLayout)
+        self.videoGenerateLayout.addWidget(self.videoPathGroupBox)
+
+        # add image label
+        
+        self.previewImageGroupBox = QGroupBox('Preview image')
+        self.previewImageContentLayout = QVBoxLayout()
+        self.previewImageLabel = QLabel()#PixmapLabel(self.previewImageGroupBox)
+
+        
+        self.previewImageContentLayout.addWidget(self.previewImageLabel)
+        self.previewImageGroupBox.setLayout(self.previewImageContentLayout)
+        self.videoGenerateLayout.addWidget(self.previewImageGroupBox)
+
+        self.videoTapButtonLayout = QVBoxLayout()
+        self.video_tap_generate_push_button = QPushButton("TextTextTextText")
+        self.video_tap_generate_push_button.setFixedHeight(30)
+        self.video_tap_generate_push_button.setFont(QFont("Arial", 13, QFont.Bold, italic=False))
+        #self.video_tap_generate_push_button.clicked.connect()
+
+        self.videoTapButtonLayout.addWidget(self.video_tap_generate_push_button)
+
+        self.videoGenerateLayout.addLayout(self.videoTapButtonLayout)
+
+        
         
 
-
         widget = QWidget()
-        widget.setLayout(videoGenerateLayout)
+        widget.setLayout(self.videoGenerateLayout)
         return widget
 
 
@@ -898,33 +925,65 @@ class MyApp(QWidget):
     def createVideoFormLayout(self):
         pathFormLayout = QFormLayout()
         
-        input_video_path_layout, self.input_video_line_edit, self.input_video_push_button = self.pathLineEditLayout()
-        output_video_path_layout, self.output_video_line_edit, self.input_video_push_button = self.pathLineEditLayout()
+        input_video_path_layout, self.input_video_line_edit, self.input_video_push_button = self.pathLineEditLayout('input')
+        output_video_path_layout, self.output_video_line_edit, self.input_video_push_button = self.pathLineEditLayout('output')
         
-
-        pathFormLayout.addRow("Input video path  ", input_video_path_layout)
-        pathFormLayout.addRow("Output video path ", output_video_path_layout)
+        pathFormLayout.addRow("Input video file  ", input_video_path_layout)
+        pathFormLayout.addRow("Output video file ", output_video_path_layout)
 
         return pathFormLayout
 
-    def pathLineEditLayout(self):
+    def pathLineEditLayout(self, type):
         hboxlayout = QHBoxLayout()
-        input_video_path_line_edit = QLineEdit()
-        input_video_push_button = QPushButton("...")
-        input_video_push_button.clicked.connect(lambda : self.getVideoFilePath(input_video_path_line_edit))
-        hboxlayout.addWidget(input_video_path_line_edit)
-        hboxlayout.addWidget(input_video_push_button)
+        video_path_line_edit = QLineEdit()
+        video_push_button = QPushButton("...")
+        if type=='input':video_push_button.clicked.connect(lambda : self.openVideoFilePath(video_path_line_edit))
+        elif type=='output':video_push_button.clicked.connect(lambda : self.saveVideoFilePath(video_path_line_edit))
+        hboxlayout.addWidget(video_path_line_edit)
+        hboxlayout.addWidget(video_push_button)
 
-        return hboxlayout, input_video_path_line_edit, input_video_push_button
+        return hboxlayout, video_path_line_edit, video_push_button
 
-    def getVideoFilePath(self,path_line_edit):
+    def openVideoFilePath(self,path_line_edit):
         path = QFileDialog.getOpenFileName(self, '','','Video file (*.mp4)')
         # does not select file
         if not path[0]:
             return
         
+        filename, file_extension = os.path.splitext(path[0])
         path_line_edit.setText(path[0])
+
+        if not file_extension == '.mp4':
+            # do something if file extension is not .mp4
+            return
+
+        # previewImage = self.getPreviewImage(path[0])
+        #img = Image.fromarray(previewImage)
+
+        test_img = cv2.imread("test.jpg")
+        h,w,c = test_img.shape
+        bpl = 3 * w
+        qimg = QImage(test_img.data, w, h, bpl, QImage.Format_RGB888).rgbSwapped()
+        pixmap = QPixmap.fromImage(qimg)
+
+        self.previewImageLabel.setPixmap(pixmap)
+
         
+        
+        
+        self.previewImageLabel.resize(self.previewImageGroupBox.width(),self.previewImageGroupBox.height())
+        self.previewImageLabel.setScaledContents(True)
+        self.previewImageContentLayout.addWidget(self.previewImageLabel)
+
+
+
+        
+
+    def saveVideoFilePath(self, path_line_edit):
+        path =  QFileDialog.getSaveFileName(self, 'Save file', "","Video file (*.mp4)") 
+        if not path[0]:
+            return
+        path_line_edit.setText(path[0])
 
     def createPatternTab(self):
         patternGenerateLayout = QVBoxLayout()
@@ -935,11 +994,9 @@ class MyApp(QWidget):
         #designing firstRowLayout
         
         size_n_frame_rate_group_box = QGroupBox('Displayer size and Video frame rate')
-
         size_n_frame_rate_group_box.setLayout(self.createSizeNFrameRateGroupBoxFormLayout())
 
         firstRowLayout.addWidget(size_n_frame_rate_group_box)
-
 
         #designing secondRowLayout
 
