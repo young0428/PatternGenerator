@@ -13,6 +13,7 @@ from PIL import Image
 import cv2
 import h5py
 import qimage2ndarray
+import time
 
 DEFAULTDISPLAYERWIDTHRANGE = 10000
 DEFAULTDISPLAYERHEIGHTRANGE = 10000
@@ -907,7 +908,8 @@ class MyApp(QWidget):
         self.video_tap_generate_push_button = QPushButton("TextTextTextText")
         self.video_tap_generate_push_button.setFixedHeight(30)
         self.video_tap_generate_push_button.setFont(QFont("Arial", 13, QFont.Bold, italic=False))
-        #self.video_tap_generate_push_button.clicked.connect()
+        self.video_tap_generate_push_button.clicked.connect(self.show_progress_bar)
+        
 
         self.videoTapButtonLayout.addWidget(self.video_tap_generate_push_button)
 
@@ -936,9 +938,14 @@ class MyApp(QWidget):
     def pathLineEditLayout(self, type):
         hboxlayout = QHBoxLayout()
         video_path_line_edit = QLineEdit()
+        video_path_line_edit.setReadOnly(True)
         video_push_button = QPushButton("...")
-        if type=='input':video_push_button.clicked.connect(lambda : self.openVideoFilePath(video_path_line_edit))
-        elif type=='output':video_push_button.clicked.connect(lambda : self.saveVideoFilePath(video_path_line_edit))
+        if type=='input':
+            self.input_video_file_path = ""
+            video_push_button.clicked.connect(lambda : self.openVideoFilePath(video_path_line_edit))
+        elif type=='output':
+            self.output_video_file_path = ""
+            video_push_button.clicked.connect(lambda : self.saveVideoFilePath(video_path_line_edit))
         hboxlayout.addWidget(video_path_line_edit)
         hboxlayout.addWidget(video_push_button)
 
@@ -952,15 +959,12 @@ class MyApp(QWidget):
         
         filename, file_extension = os.path.splitext(path[0])
         path_line_edit.setText(path[0])
-
+        self.input_video_file_path = path[0]
         if not file_extension == '.mp4':
             # do something if file extension is not .mp4
             return
 
-        # previewImage = self.getPreviewImage(path[0])
-        #img = Image.fromarray(previewImage)
-
-        test_img = cv2.imread("test.jpg")
+        test_img = cv2.imread("./test.jpg")
         h,w,c = test_img.shape
         bpl = 3 * w
         qimg = QImage(test_img.data, w, h, bpl, QImage.Format_RGB888).rgbSwapped()
@@ -968,14 +972,24 @@ class MyApp(QWidget):
 
         self.previewImageLabel.setPixmap(pixmap)
 
-        
-        
-        
         self.previewImageLabel.resize(self.previewImageGroupBox.width(),self.previewImageGroupBox.height())
         self.previewImageLabel.setScaledContents(True)
+        self.previewImageLabel.setMinimumSize(1, 1)
         self.previewImageContentLayout.addWidget(self.previewImageLabel)
 
+    def show_progress_bar(self):
+        self.progressDialog = QProgressDialog("Starting...", "Cancel", 0, 100, self)
+        self.progressDialog.setWindowTitle('Please wait...')
+        self.progressDialog.setModal(True)
+        self.progressDialog.show()
 
+
+        for i in range(1, 101):
+            self.progressDialog.setValue(i)
+            QApplication.processEvents()
+            time.sleep(0.05)
+            if self.progressDialog.wasCanceled():
+                break
 
         
 
