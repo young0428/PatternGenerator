@@ -936,6 +936,7 @@ class MyApp(QWidget):
     def pathLineEditLayout(self, type):
         hboxlayout = QHBoxLayout()
         video_path_line_edit = QLineEdit()
+        video_path_line_edit.setReadOnly(True)
         video_push_button = QPushButton("...")
         if type=='input':video_push_button.clicked.connect(lambda : self.openVideoFilePath(video_path_line_edit))
         elif type=='output':video_push_button.clicked.connect(lambda : self.saveVideoFilePath(video_path_line_edit))
@@ -960,10 +961,20 @@ class MyApp(QWidget):
         # previewImage = self.getPreviewImage(path[0])
         #img = Image.fromarray(previewImage)
 
-        test_img = cv2.imread("test.jpg")
-        h,w,c = test_img.shape
+        #self.input_video_file_path = ""
+
+        vidcap = cv2.VideoCapture(self.input_video_file_path)
+        # get total number of frames
+        totalFrames = vidcap.get(cv2.CAP_PROP_FRAME_COUNT)
+        # set frame position
+        vidcap.set(cv2.CAP_PROP_POS_FRAMES,totalFrames//2)
+        success, image = vidcap.read()
+        if success:
+            cv2.imwrite("random_frame.jpg", image)
+
+        h,w,c = image.shape
         bpl = 3 * w
-        qimg = QImage(test_img.data, w, h, bpl, QImage.Format_RGB888).rgbSwapped()
+        qimg = QImage(image.data, w, h, bpl, QImage.Format_RGB888).rgbSwapped()
         pixmap = QPixmap.fromImage(qimg)
 
         self.previewImageLabel.setPixmap(pixmap)
