@@ -939,6 +939,7 @@ class MyApp(QWidget):
         hboxlayout = QHBoxLayout()
         video_path_line_edit = QLineEdit()
         video_path_line_edit.setReadOnly(True)
+        video_path_line_edit.setReadOnly(True)
         video_push_button = QPushButton("...")
         if type=='input':
             self.input_video_file_path = ""
@@ -964,10 +965,13 @@ class MyApp(QWidget):
             # do something if file extension is not .mp4
             return
 
-        test_img = cv2.imread("./test.jpg")
+        # previewImage = self.getPreviewImage(path[0])
+        #img = Image.fromarray(previewImage)
+
+        test_img = cv2.imread("test.jpg")
         h,w,c = test_img.shape
         bpl = 3 * w
-        qimg = QImage(test_img.data, w, h, bpl, QImage.Format_RGB888).rgbSwapped()
+        qimg = QImage(image.data, w, h, bpl, QImage.Format_RGB888).rgbSwapped()
         pixmap = QPixmap.fromImage(qimg)
 
         self.previewImageLabel.setPixmap(pixmap)
