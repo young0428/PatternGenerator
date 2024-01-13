@@ -914,7 +914,116 @@ class MyApp(QWidget):
         sizeNFrameRateGroupBoxFormLayout.addRow("video frame rate : ", self.video_frame_rate_spin_box)
 
         return sizeNFrameRateGroupBoxFormLayout
+    
+    def clickedRadioButton(self, button):
+        button_text = self.rotationGroup.checkedButton().text()
+        if button_text == "0°":
+            self.checked_rotate_degree = 0
+            return
+        if button_text == "90°":
+            self.checked_rotate_degree = 90
+            return
+        if button_text == "180°":
+            self.checked_rotate_degree = 180
+            return
+        if button_text == "270°":
+            self.checked_rotate_degree = 270
+            return
+        
+        return
 
+    def createRotationRadioBox(self):
+        
+        
+        # rotation_label = QLabel("Video roation : ")
+        # self.rotationBoxLayout.addWidget(rotation_label)
+        
+        self.rotationGroup = QButtonGroup(self.rotationGroupBox)
+        
+        hbox0 = QHBoxLayout()
+        self.radio_0 = QRadioButton("0°", self.rotationGroupBox)
+        self.label_0 = QLabel()
+        self.label_0.setFixedSize(30,30)
+        self.label_0.setScaledContents(True)
+        self.label_0.setMinimumSize(1, 1)
+        pixmap0 = QPixmap('./image_90.png')
+        self.label_0.setPixmap(pixmap0)
+        hbox0.addWidget(self.radio_0)
+        hbox0.setSpacing(1)
+        hbox0.addWidget(self.label_0)
+        
+        hbox90 = QHBoxLayout()
+        self.radio_90 = QRadioButton("90°", self.rotationGroupBox)
+        self.label_90 = QLabel()
+        
+        
+        self.label_90.setFixedSize(30,30)
+        self.label_90.setScaledContents(True)
+        self.label_90.setMinimumSize(1, 1)
+        pixmap90 = QPixmap('./image_90.png').scaled(30,30)
+        self.label_90.setPixmap(pixmap90)
+        hbox90.addWidget(self.radio_90)
+        hbox90.setSpacing(1)
+        hbox90.addWidget(self.label_90)
+        
+        
+        
+        hbox180 = QHBoxLayout()
+        self.radio_180 = QRadioButton("180°", self.rotationGroupBox)
+        self.label_180 = QLabel()
+        self.label_180.setFixedSize(30,30)
+        self.label_180.setScaledContents(True)
+        self.label_180.setMinimumSize(1, 1)
+        pixmap180 = QPixmap('./image_90.png')
+        self.label_180.setPixmap(pixmap180)
+        hbox180.addWidget(self.radio_180)
+        hbox180.setSpacing(1)
+        hbox180.addWidget(self.label_180)
+        
+        
+        hbox270 = QHBoxLayout()
+        self.radio_270 = QRadioButton("270°", self.rotationGroupBox)
+        self.label_270 = QLabel()
+        self.label_270.setFixedSize(30,30)
+        self.label_270.setScaledContents(True)
+        self.label_270.setMinimumSize(1, 1)
+        pixmap270 = QPixmap('./image_90.png')
+        self.label_270.setPixmap(pixmap270)
+        hbox270.addWidget(self.radio_270)
+        hbox270.setSpacing(1)
+        hbox270.addWidget(self.label_270)
+        
+        
+        
+        
+        # self.checked_rotate_degree 변수에 선택된 각도(호도법, °) 저장
+        self.checked_rotate_degree = 0
+        self.rotationGroup.addButton(self.radio_0)
+        self.rotationGroup.addButton(self.radio_90)
+        self.rotationGroup.addButton(self.radio_180)
+        self.rotationGroup.addButton(self.radio_270)
+        self.rotationGroup.buttonClicked.connect(self.clickedRadioButton)
+        
+        self.rotation_button_hbox = QHBoxLayout()
+        
+        spacing_px = 50
+        self.rotation_button_hbox.addStretch(0)
+        self.rotation_button_hbox.addLayout(hbox0)
+        self.rotation_button_hbox.addStretch(0)
+        self.rotation_button_hbox.addLayout(hbox90)
+        self.rotation_button_hbox.addStretch(0)
+        self.rotation_button_hbox.addLayout(hbox180)
+        self.rotation_button_hbox.addStretch(0)
+        self.rotation_button_hbox.addLayout(hbox270)
+        self.rotation_button_hbox.addStretch(0)
+        
+        
+        self.rotationBoxLayout.addLayout(self.rotation_button_hbox)
+        self.radio_0.setChecked(True)
+        
+        
+        return
+        
     def createVideoTab(self):
         self.videoGenerateLayout = QVBoxLayout()
 
@@ -926,6 +1035,13 @@ class MyApp(QWidget):
         self.videoPathGroupBox.setFixedHeight(100)
         self.videoPathGroupBox.setLayout(pathFormLayout)
         self.videoGenerateLayout.addWidget(self.videoPathGroupBox)
+        
+        self.rotationBoxLayout = QHBoxLayout()
+        self.rotationGroupBox = QGroupBox('Roation')
+        self.rotationGroupBox.setFixedHeight(50)
+        self.rotationGroupBox.setLayout(self.rotationBoxLayout)
+        self.videoGenerateLayout.addWidget(self.rotationGroupBox)
+        self.createRotationRadioBox()
 
         # add image label
         
