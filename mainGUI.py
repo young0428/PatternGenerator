@@ -3,6 +3,7 @@ from PyQt5.QtWidgets import *
 from PyQt5.QtGui import *
 from PyQt5.QtCore import *
 
+
 import os
 import copy
 import numpy as np
@@ -65,8 +66,8 @@ class playingImageThread(QThread):
     def run(self):
         self.parent.playFlag = True
         initialTime = QTime.currentTime()
-        print("initialTime")
-        print(initialTime)
+        #print("initialTime")
+        #print(initialTime)
         initialFrameIndex = self.parent.slider.value()
         frameRate = patternGenerator.currentvideoFrameRate 
 
@@ -79,7 +80,7 @@ class playingImageThread(QThread):
 
             if(frameDifference != fdtemp):
                 self.parent.slider.setValue(initialFrameIndex + frameDifference)
-                print(currentTime, timeDifference, frameDifference, self.parent.slider.value())
+                #print(currentTime, timeDifference, frameDifference, self.parent.slider.value())
 
             fdtemp = frameDifference
 
@@ -91,7 +92,7 @@ class resettingFlagThread(QThread):
     def run(self):
         self.parent.playFlag = False
 
-class generatedPatternWindow(QDialog):
+class generatedPatternWindow(QDialog,QIcon):
 
     def __init__(self):
         super().__init__()
@@ -115,6 +116,16 @@ class generatedPatternWindow(QDialog):
         self.pushbutton2.setFixedSize(30,30)
         self.pushbutton3.setFixedSize(30,30)
         self.pushbutton4.setFixedSize(30,30)
+
+        self.pushbutton1.setIcon(QIcon('blue255.jpg'))
+        self.pushbutton2.setIcon(QIcon('white255.jpg'))
+        self.pushbutton3.setIcon(QIcon('test.jpg'))
+        self.pushbutton4.setIcon(QIcon('random_frame.jpg'))
+
+        self.pushbutton1.setIconSize(QSize(30,30))
+        self.pushbutton2.setIconSize(QSize(30,30))
+        self.pushbutton3.setIconSize(QSize(30,30))
+        self.pushbutton4.setIconSize(QSize(30,30))
 
         self.pushbutton1.setFocusPolicy(Qt.NoFocus)
         self.pushbutton2.setFocusPolicy(Qt.NoFocus)
@@ -147,7 +158,7 @@ class generatedPatternWindow(QDialog):
 
         self.slider.valueChanged.connect (lambda : self.saveChangedImageIndexThread())
 
-        print(len(patternGenerator.QPixmapArray))
+        #print(len(patternGenerator.QPixmapArray))
         self.label1.setPixmap(patternGenerator.QPixmapArray[0])
 
         layout.addStretch(1)
@@ -171,6 +182,7 @@ class generatedPatternWindow(QDialog):
         mainlayout.addLayout(layout2)
         mainlayout.addLayout(layout3)
 
+        self.setWindowTitle('Generated Pattern')
         self.setLayout(mainlayout)
         self.setWindowModality(Qt.ApplicationModal)
 
@@ -193,11 +205,11 @@ class generatedPatternWindow(QDialog):
 
     def goToPreviousImage(self):
         self.slider.setValue(self.slider.value()-1)
-        print(self.slider.value())
+        #print(self.slider.value())
 
     def goToNextImage(self):
         self.slider.setValue(self.slider.value()+1)
-        print(self.slider.value())
+        #print(self.slider.value())
     
 class MyApp(QWidget):
 
@@ -235,7 +247,8 @@ class MyApp(QWidget):
         self.setLayout(self.mainLayout)
 
         #set window format
-        self.setWindowTitle('Pattern Generateor')
+        self.setWindowIcon(QIcon('blue255.jpg'))
+        self.setWindowTitle('Pattern Generator')
         self.move(300, 300)
         #self.setFixedSize(500,600)
         self.resize(700, 700) # set window size
@@ -557,7 +570,7 @@ class MyApp(QWidget):
                                                       int(currentDisplayHeight / currentDisplayCoveringAngle / 2 * self.TimeSequenceNDiscLocationdset[j][i+1]), 
                                                       discColorBGR,
                                                       -1)
-                print(int(currentDisplayHeight / currentDisplayCoveringAngle / 2 * self.TimeSequenceNDiscLocationdset[j][i+1]))
+                #print(int(currentDisplayHeight / currentDisplayCoveringAngle / 2 * self.TimeSequenceNDiscLocationdset[j][i+1]))
 
         self.loomingImageArray = []
         self.loomingQImageArray = []
@@ -1537,7 +1550,7 @@ class MyApp(QWidget):
         totalInformation.append(func)
 
         self.insertRowNValueInTable(currentObjectCnt[0], totalInformation, table, checkBoxList)
-        print(totalInformation)
+        #print(totalInformation)
 
     def insertRowNValueInTable(self, objectCnt, InformationArr, table, checkBoxList):
         table.insertRow(objectCnt)
@@ -2006,9 +2019,9 @@ class MyApp(QWidget):
 
 
     def saveSpinBoxValue(self, spinBox, spinBoxValue):
-        print('save : ' + str(spinBox.value()))
-        print('max : ' + str(spinBox.maximum()))
-        print('min : ' + str(spinBox.minimum()))
+        #print('save : ' + str(spinBox.value()))
+        #print('max : ' + str(spinBox.maximum()))
+        #print('min : ' + str(spinBox.minimum()))
         spinBoxValue[0] = spinBox.value()
 
 
