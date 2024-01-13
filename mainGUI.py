@@ -14,6 +14,7 @@ import cv2
 import h5py
 import qimage2ndarray
 import time
+from videoConverterTest import convertVideo
 
 DEFAULTDISPLAYERWIDTHRANGE = 10000
 DEFAULTDISPLAYERHEIGHTRANGE = 10000
@@ -56,6 +57,20 @@ class savingChangedImageIndexThread(QThread):
     def run(self):
         self.parent.label1.setPixmap(patternGenerator.QPixmapArray[self.parent.slider.value()])
         self.parent.updateCurrentIndexText()
+        
+class convertVideoThread(QThread):
+    update_progress = pyqtSignal(int)
+    def __init__(self, input_path, output_path, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.input_path = input_path
+        self.output_path = output_path
+        
+        self._is_running = True
+    def run(self):
+        convertVideo(self.input_path, self.output_path, self.update_progress, self)
+        
+    def stop(self):
+        self._is_running = False
 
 class playingImageThread(QThread):
     def __init__(self, parent):
@@ -908,7 +923,7 @@ class MyApp(QWidget):
         self.video_tap_generate_push_button = QPushButton("TextTextTextText")
         self.video_tap_generate_push_button.setFixedHeight(30)
         self.video_tap_generate_push_button.setFont(QFont("Arial", 13, QFont.Bold, italic=False))
-        self.video_tap_generate_push_button.clicked.connect(self.show_progress_bar)
+        self.video_tap_generate_push_button.clicked.connect(self.runVideoConverter)
         
 
         self.videoTapButtonLayout.addWidget(self.video_tap_generate_push_button)
@@ -991,20 +1006,32 @@ class MyApp(QWidget):
         self.previewImageLabel.setMinimumSize(1, 1)
         self.previewImageContentLayout.addWidget(self.previewImageLabel)
 
-    def show_progress_bar(self):
+    def runVideoConverter(self):
+        if self.input_video_file_path == "" or self.output_video_file_path == "":
+            return
         self.progressDialog = QProgressDialog("Starting...", "Cancel", 0, 100, self)
         self.progressDialog.setWindowTitle('Please wait...')
         self.progressDialog.setModal(True)
         self.progressDialog.show()
+        self.progressDialog.canceled.connect(self.stop_conversion)
+        
+        self.thread = convertVideoThread(self.input_video_file_path, self.output_video_file_path)
+        self.thread.update_progress.connect(self.updateProgress)
+        self.thread.start()
+        self.thread.finished.connect(self.conversion_finished)
+        
+        #converVideo(self.input_video_file_path, self.output_video_file_path, self.progressDialog, QApplication.processEvents)
 
-
-        for i in range(1, 101):
-            self.progressDialog.setValue(i)
-            QApplication.processEvents()
-            time.sleep(0.05)
-            if self.progressDialog.wasCanceled():
-                break
-
+    def updateProgress(self, value):
+        self.progressDialog.setValue(value)
+        
+    def conversion_finished(self):
+        self.progressDialog.close()
+        return
+    
+    def stop_conversion(self):
+        self.thread.stop()
+        return
         
 
     def saveVideoFilePath(self, path_line_edit):
@@ -1012,6 +1039,7 @@ class MyApp(QWidget):
         if not path[0]:
             return
         path_line_edit.setText(path[0])
+        self.output_video_file_path = path[0]
 
     def createPatternTab(self):
         patternGenerateLayout = QVBoxLayout()
