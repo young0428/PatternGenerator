@@ -239,6 +239,12 @@ class MyApp(QWidget):
         self.generatorLayout = QVBoxLayout()
         self.generator_type_tab = QTabWidget()
         
+        stylesheet = """ 
+            QTabWidget>QWidget>QWidget{background: rgb(240,240,240);}
+            """
+        self.generator_type_tab.setStyleSheet(stylesheet)
+
+
         #videoTab = self.createVideoTab()
         patternTab = self.createPatternTab()
         videoTab = self.createVideoTab()
@@ -933,7 +939,7 @@ class MyApp(QWidget):
         self.videoGenerateLayout.addWidget(self.previewImageGroupBox)
 
         self.videoTapButtonLayout = QVBoxLayout()
-        self.video_tap_generate_push_button = QPushButton("TextTextTextText")
+        self.video_tap_generate_push_button = QPushButton("Generate Video")
         self.video_tap_generate_push_button.setFixedHeight(30)
         self.video_tap_generate_push_button.setFont(QFont("Arial", 13, QFont.Bold, italic=False))
         self.video_tap_generate_push_button.clicked.connect(self.runVideoConverter)
@@ -1070,6 +1076,11 @@ class MyApp(QWidget):
         #designing secondRowLayout
 
         self.pattern_type_tab = QTabWidget()
+
+        stylesheet = """ 
+            QTabWidget>QWidget>QWidget{background: rgb(240,240,240);}
+            """
+        self.pattern_type_tab.setStyleSheet(stylesheet)
 
         barTab = self.createBarTab()
         spotTab = self.createSpotTab()
