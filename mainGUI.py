@@ -9,7 +9,7 @@ import copy
 import numpy as np
 from PIL import Image
 import math
-from datetime import datetime
+from datetime import datetime, timedelta
 from PIL import Image
 import cv2
 import h5py
@@ -1028,13 +1028,27 @@ class MyApp(QWidget):
         self.videoGenerateLayout = QVBoxLayout()
 
         # add input & output path
+        self.pathPreviewLayout = QHBoxLayout()
         
         pathFormLayout = self.createVideoFormLayout()
-        
         self.videoPathGroupBox = QGroupBox('File path')
         self.videoPathGroupBox.setFixedHeight(100)
         self.videoPathGroupBox.setLayout(pathFormLayout)
-        self.videoGenerateLayout.addWidget(self.videoPathGroupBox)
+        self.pathPreviewLayout.addWidget(self.videoPathGroupBox)
+        
+        self.previewImageGroupBox = QGroupBox('Preview')
+        self.previewImageGroupBox.setFixedHeight(100)
+        self.previewImageGroupBox.setFixedWidth(200)
+        self.previewImageContentLayout = QVBoxLayout()
+        self.previewImageContentLayout.setContentsMargins(3, 0, 3, 3)
+        self.previewImageLabel = QLabel()
+        
+        
+        self.previewImageContentLayout.addWidget(self.previewImageLabel)
+        self.previewImageGroupBox.setLayout(self.previewImageContentLayout)
+        self.pathPreviewLayout.addWidget(self.previewImageGroupBox)
+        
+        self.videoGenerateLayout.addLayout(self.pathPreviewLayout)
         
         self.rotationBoxLayout = QHBoxLayout()
         self.rotationGroupBox = QGroupBox('Roation')
@@ -1045,14 +1059,16 @@ class MyApp(QWidget):
 
         # add image label
         
-        self.previewImageGroupBox = QGroupBox('Preview image')
-        self.previewImageContentLayout = QVBoxLayout()
-        self.previewImageLabel = QLabel()#PixmapLabel(self.previewImageGroupBox)
+        self.videoEditorGroupBox = QGroupBox('Editor')
+        self.videoEditorContentLayout = QVBoxLayout()
+        
+        
+        
 
         
-        self.previewImageContentLayout.addWidget(self.previewImageLabel)
-        self.previewImageGroupBox.setLayout(self.previewImageContentLayout)
-        self.videoGenerateLayout.addWidget(self.previewImageGroupBox)
+        self.videoEditorContentLayout.addWidget(self.videoEditorLabel)
+        self.videoEditorGroupBox.setLayout(self.videoEditorContentLayout)
+        self.videoGenerateLayout.addWidget(self.videoEditorGroupBox)
 
         self.videoTapButtonLayout = QVBoxLayout()
         self.video_tap_generate_push_button = QPushButton("Generate Video")
@@ -1080,8 +1096,10 @@ class MyApp(QWidget):
         input_video_path_layout, self.input_video_line_edit, self.input_video_push_button = self.pathLineEditLayout('input')
         output_video_path_layout, self.output_video_line_edit, self.input_video_push_button = self.pathLineEditLayout('output')
         
+        self.totalFrameLabel = QLabel()
         pathFormLayout.addRow("Input video file  ", input_video_path_layout)
         pathFormLayout.addRow("Output video file ", output_video_path_layout)
+        pathFormLayout.addRow("Total frame ", self.totalFrameLabel)
 
         return pathFormLayout
 
@@ -1091,6 +1109,7 @@ class MyApp(QWidget):
         video_path_line_edit.setReadOnly(True)
         video_path_line_edit.setReadOnly(True)
         video_push_button = QPushButton("...")
+        video_push_button.setFixedWidth(35)
         if type=='input':
             self.input_video_file_path = ""
             video_push_button.clicked.connect(lambda : self.openVideoFilePath(video_path_line_edit))
@@ -1120,14 +1139,26 @@ class MyApp(QWidget):
 
         #self.input_video_file_path = ""
 
-        vidcap = cv2.VideoCapture(self.input_video_file_path)
+        self.vidcap = cv2.VideoCapture(self.input_video_file_path)
         # get total number of frames
-        totalFrames = vidcap.get(cv2.CAP_PROP_FRAME_COUNT)
+        self.totalFrames = self.vidcap.get(cv2.CAP_PROP_FRAME_COUNT)
         # set frame position
-        vidcap.set(cv2.CAP_PROP_POS_FRAMES,totalFrames//2)
-        success, image = vidcap.read()
+        self.vidcap.set(cv2.CAP_PROP_POS_FRAMES,self.totalFrames//2)
+        success, image = self.vidcap.read()
         if success:
             cv2.imwrite("random_frame.jpg", image)
+        self.input_video_fps = self.vidcap.get(cv2.CAP_PROP_FPS)
+        
+        # Get video duration in seconds
+        self.input_video_duration = self.totalFrames / self.input_video_fps
+        
+        # Formatting to HH:MM:SS format
+        td= timedelta(seconds=self.input_video_duration)
+        hours, remainder = divmod(td.seconds, 3600)
+        minutes, seconds = divmod(remainder, 60)
+        milliseconds = int(td.microseconds / 10000)
+        str_time = "{:02}:{:02}:{:02}:{:02}".format(hours, minutes, seconds, milliseconds)
+        self.totalFrameLabel.setText(f"{int(self.totalFrames)} ({str_time})")
 
         h,w,c = image.shape
         bpl = 3 * w
@@ -1216,6 +1247,7 @@ class MyApp(QWidget):
 
         isPatternGenerated = False
         generatedPatternindex = -1
+    
 
         self.generate_pattern_push_button = QPushButton('Generate Pattern')
         self.generate_pattern_push_button.setFixedHeight(30)
