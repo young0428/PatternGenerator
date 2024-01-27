@@ -279,7 +279,7 @@ class MyApp(QWidget):
     def saveGeneratedPatternasHDF(self):
         if(self.isPatternGenerated == False): return
 
-        FileSave = QFileDialog.getSaveFileName(self, 'Save file', "","HDF file (*.h5 *.hdf)")    # <- Here
+        FileSave = QFileDialog.getSaveFileName(self, 'Save file', "","h5 file (*.h5 *.hdf)")    # <- Here
         #f = h5py.File(FileSave[0]+".hdf5", "w")
 
         # End if push cancle button or take empty file name
@@ -308,34 +308,39 @@ class MyApp(QWidget):
         ## test
     def saveGeneratedPatternasSequentialImage(self):
         if(self.isPatternGenerated == False): return
-
-        FileSave = QFileDialog.getSaveFileName(self, 'Save file', "","folder")
+        
+        FileSave = QFileDialog.getSaveFileName(self, 'Save file', "","mp4 file (*.mp4)")
+        # End if push cancle button or take empty file name
         # FileSave[0] == FileName
-        if FileSave[0] == "":
-            return
-        os.makedirs(FileSave[0])
+        if FileSave[0] == "": return
 
         if(self.generatedPatternindex == 0): #bar
-            for i in range(len(self.barImageArray)):
-                dir  = FileSave[0]+ '\\' + str(i+1) + '.jpg'
-                self.barImageArray[i].save(dir,'JPEG') 
+            mp4imageset = copy.deepcopy(self.barImageArray)
         elif(self.generatedPatternindex == 1): #spot
-            for i in range(len(self.spotImageArray)):
-                dir  = FileSave[0]+ '\\' + str(i+1) + '.jpg'
-                self.spotImageArray[i].save(dir,'JPEG') 
+            mp4imageset = copy.deepcopy(self.spotImageArray)
         elif(self.generatedPatternindex == 2): #looming
-            for i in range(len(self.loomingImageArray)):
-                dir  = FileSave[0]+ '\\' + str(i+1) + '.jpg'
-                self.loomingImageArray[i].save(dir,'JPEG') 
+            mp4imageset = copy.deepcopy(self.loomingImageArray)
         elif(self.generatedPatternindex == 3): #grating
-            for i in range(len(self.gratingImageArray)):
-                dir  = FileSave[0]+ '\\' + str(i+1) + '.jpg'
-                self.gratingImageArray[i].save(dir,'JPEG') 
+            mp4imageset = copy.deepcopy(self.gratingImageArray)
+                
+        width,height = mp4imageset[0].size
+
+
+        fourcc = cv2.VideoWriter_fourcc(*'mp4v')  # You can change the codec as needed
+        output_video = cv2.VideoWriter(FileSave[0], fourcc, self.video_frame_rate_value[0], (width, height))
+
+        for i in range(len(mp4imageset)):
+            temp = np.array(mp4imageset[i])
+            temp = cv2.cvtColor(temp, cv2.COLOR_RGB2BGR)
+            output_video.write(temp)
+
+        output_video.release()
+
 
     def saveGeneratedPatternasGIF(self):
         if(self.isPatternGenerated == False): return
 
-        FileSave = QFileDialog.getSaveFileName(self, 'Save file', "","GIF Image (*.gif)")
+        FileSave = QFileDialog.getSaveFileName(self, 'Save file', "","gif file (*.gif)")
         # End if push cancle button or take empty file name
         # FileSave[0] == FileName
         if FileSave[0] == "":
@@ -1245,9 +1250,8 @@ class MyApp(QWidget):
 
         secondRowLayout.addWidget(self.pattern_type_tab)
 
-        isPatternGenerated = False
-        generatedPatternindex = -1
-    
+        self.isPatternGenerated = False
+        self.generatedPatternindex = -1
 
         self.generate_pattern_push_button = QPushButton('Generate Pattern')
         self.generate_pattern_push_button.setFixedHeight(30)
@@ -1261,18 +1265,18 @@ class MyApp(QWidget):
 
         self.saveDataRowLayout = QHBoxLayout()
 
-        self.save_generated_pattern_as_hdf_push_button = QPushButton('Save as HDF5')
+        self.save_generated_pattern_as_hdf_push_button = QPushButton('Save as h5')
         self.save_generated_pattern_as_hdf_push_button.setFixedHeight(30)
         self.save_generated_pattern_as_hdf_push_button.setFont(QFont("Arial", 13, QFont.Bold, italic=False))
         self.save_generated_pattern_as_hdf_push_button.clicked.connect(lambda : self.saveGeneratedPatternasHDF())
 
 
-        self.save_generated_pattern_as_sequential_image_push_button = QPushButton('Save as Sequential Image')
+        self.save_generated_pattern_as_sequential_image_push_button = QPushButton('Save as mp4')
         self.save_generated_pattern_as_sequential_image_push_button.setFixedHeight(30)
         self.save_generated_pattern_as_sequential_image_push_button.setFont(QFont("Arial", 13, QFont.Bold, italic=False))
         self.save_generated_pattern_as_sequential_image_push_button.clicked.connect(lambda : self.saveGeneratedPatternasSequentialImage())
 
-        self.save_generated_pattern_as_gif_push_button = QPushButton('Save as GIF')
+        self.save_generated_pattern_as_gif_push_button = QPushButton('Save as gif')
         self.save_generated_pattern_as_gif_push_button.setFixedHeight(30)
         self.save_generated_pattern_as_gif_push_button.setFont(QFont("Arial", 13, QFont.Bold, italic=False))
         self.save_generated_pattern_as_gif_push_button.clicked.connect(lambda : self.saveGeneratedPatternasGIF())
