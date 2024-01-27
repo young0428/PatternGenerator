@@ -1071,7 +1071,7 @@ class MyApp(QWidget):
         
 
         
-        self.videoEditorContentLayout.addWidget(self.videoEditorLabel)
+        #self.videoEditorContentLayout.addWidget(self.videoEditorLabel)
         self.videoEditorGroupBox.setLayout(self.videoEditorContentLayout)
         self.videoGenerateLayout.addWidget(self.videoEditorGroupBox)
 
