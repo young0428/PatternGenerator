@@ -1,15 +1,15 @@
 import numpy as np
 import math
 import cv2
-def convertVideo(input_path, output_path, signal, threadobj):
+def convertVideo(input_path, output_path, signal, app_obj, threadobj):
     input_video_path = input_path
     output_video_path = output_path
     video = cv2.VideoCapture(input_video_path)
 
     video_width = int(video.get(cv2.CAP_PROP_FRAME_WIDTH))
     video_height = int(video.get(cv2.CAP_PROP_FRAME_HEIGHT))
-    video_fps = video.get(cv2.CAP_PROP_FPS)
-    total_frames = int(video.get(cv2.CAP_PROP_FRAME_COUNT))
+    video_fps = app_obj.input_video_fps
+    total_frames = int(app_obj.modified_frame)+1
 
     elevation_range = 108  # -54 to 54 degrees
     azimuth_range = 328   # -164 to 164 degrees
@@ -25,11 +25,13 @@ def convertVideo(input_path, output_path, signal, threadobj):
     resized_width = 2880  # Replace with your desired width
 
     flag = True
-    frame_cnt = 0
+    frame_cnt = app_obj.startFrameSpinbox.value()
+    video.set(cv2.CAP_PROP_POS_FRAMES, frame_cnt-1)
     while threadobj._is_running:
         progress_ratio = int(frame_cnt/total_frames*100)
         signal.emit(progress_ratio)
-        frame_cnt += 1
+        if progress_ratio >= 100:
+            break        
         #read image
         ret, image = video.read()
         if not ret: break  # Break the loop when the video ends
@@ -96,12 +98,10 @@ def convertVideo(input_path, output_path, signal, threadobj):
         rotated_image = cv2.rotate(projected_image, cv2.ROTATE_90_COUNTERCLOCKWISE)
 
         output_video.write(rotated_image)
+        frame_cnt += 1
         
         
         
-
-        
-
     video.release()
     output_video.release()
 

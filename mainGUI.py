@@ -61,14 +61,15 @@ class savingChangedImageIndexThread(QThread):
         
 class convertVideoThread(QThread):
     update_progress = pyqtSignal(int)
-    def __init__(self, input_path, output_path, *args, **kwargs):
+    def __init__(self, input_path, output_path, app_obj, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.input_path = input_path
         self.output_path = output_path
+        self.app_obj = app_obj
         
         self._is_running = True
     def run(self):
-        convertVideo(self.input_path, self.output_path, self.update_progress, self)
+        convertVideo(self.input_path, self.output_path, self.update_progress, self.app_obj, self)
         
     def stop(self):
         self._is_running = False
@@ -1037,7 +1038,7 @@ class MyApp(QWidget):
         
         pathFormLayout = self.createVideoFormLayout()
         self.videoPathGroupBox = QGroupBox('File path')
-        self.videoPathGroupBox.setFixedHeight(100)
+        self.videoPathGroupBox.setFixedHeight(120)
         self.videoPathGroupBox.setLayout(pathFormLayout)
         self.pathPreviewLayout.addWidget(self.videoPathGroupBox)
         
@@ -1067,12 +1068,33 @@ class MyApp(QWidget):
         self.videoEditorGroupBox = QGroupBox('Editor')
         self.videoEditorContentLayout = QVBoxLayout()
         
+        self.videoEditorInfoGroupBox = QGroupBox('Info')
+        self.videoEditorInfoGroupBox.setSizePolicy(QSizePolicy.Fixed, QSizePolicy.Fixed)
+        self.videoEditorInfoGroupBox.setFixedHeight(90)
+        
+        self.videoEditorInfoContentLayout = self.createInfoFormLayout() # createInfoFormLayout()
+        self.videoEditorInfoGroupBox.setLayout(self.videoEditorInfoContentLayout)
+        
+        self.videoEditorStartFrameGroupBox = QGroupBox('Start frame')
+        self.videoEditorStartFrameGroupBoxContentLayout = QVBoxLayout()
+        self.videoEditorStartFrameLabel = QLabel()
+        self.videoEditorStartFrameGroupBoxContentLayout.addWidget(self.videoEditorStartFrameLabel)
+        self.videoEditorStartFrameGroupBox.setLayout(self.videoEditorStartFrameGroupBoxContentLayout)
+        
+        self.videoEditorLastFrameGroupBox = QGroupBox('Last frame')
+        self.videoEditorLastFrameGroupBoxContentLayout = QVBoxLayout()
+        self.videoEditorLastFrameLabel = QLabel()
+        self.videoEditorLastFrameGroupBoxContentLayout.addWidget(self.videoEditorLastFrameLabel)
+        self.videoEditorLastFrameGroupBox.setLayout(self.videoEditorLastFrameGroupBoxContentLayout)
         
         
-
         
-        #self.videoEditorContentLayout.addWidget(self.videoEditorLabel)
+        self.videoEditorContentLayout.addWidget(self.videoEditorInfoGroupBox)
+        self.videoEditorContentLayout.addWidget(self.videoEditorStartFrameGroupBox)
+        self.videoEditorContentLayout.addWidget(self.videoEditorLastFrameGroupBox)
         self.videoEditorGroupBox.setLayout(self.videoEditorContentLayout)
+        
+        
         self.videoGenerateLayout.addWidget(self.videoEditorGroupBox)
 
         self.videoTapButtonLayout = QVBoxLayout()
@@ -1086,9 +1108,6 @@ class MyApp(QWidget):
 
         self.videoGenerateLayout.addLayout(self.videoTapButtonLayout)
 
-        
-        
-
         widget = QWidget()
         widget.setLayout(self.videoGenerateLayout)
         return widget
@@ -1101,12 +1120,43 @@ class MyApp(QWidget):
         input_video_path_layout, self.input_video_line_edit, self.input_video_push_button = self.pathLineEditLayout('input')
         output_video_path_layout, self.output_video_line_edit, self.input_video_push_button = self.pathLineEditLayout('output')
         
+        self.frameRateLabel = QLabel()
         self.totalFrameLabel = QLabel()
+        
         pathFormLayout.addRow("Input video file  ", input_video_path_layout)
         pathFormLayout.addRow("Output video file ", output_video_path_layout)
-        pathFormLayout.addRow("Total frame ", self.totalFrameLabel)
+        pathFormLayout.addRow("Framerate ", self.frameRateLabel)
+        pathFormLayout.addRow("FPS ", self.totalFrameLabel)
 
         return pathFormLayout
+    
+    def createInfoFormLayout(self):
+        infoFormLayout = QFormLayout()
+        
+        infoFormLayout.setContentsMargins(5,5,5,5)  
+        self.startFrameSpinbox = QSpinBox(self)
+        self.startFrameSpinbox.setFixedWidth(100)
+        self.startFrameSpinbox.setMinimum(1)
+        self.startFrameSpinbox.setMaximum(1)
+        
+        self.lastFrameSpinbox = QSpinBox(self)
+        self.lastFrameSpinbox.setFixedWidth(100)
+        self.lastFrameSpinbox.setMinimum(1)
+        self.startFrameSpinbox.setMaximum(1)
+        
+        self.modifiedFrameLabel = QLabel(self)
+        
+        self.startFrameSpinbox.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
+        self.lastFrameSpinbox.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
+        self.modifiedFrameLabel.setSizePolicy(QSizePolicy.Preferred, QSizePolicy.Preferred)
+        self.videoEditorInfoGroupBox.setSizePolicy(QSizePolicy.Minimum, QSizePolicy.Preferred)
+        
+        infoFormLayout.addRow("Start frame :", self.startFrameSpinbox)
+        infoFormLayout.addRow("Last frame :", self.lastFrameSpinbox)
+        infoFormLayout.addRow("Modified frame :", self.modifiedFrameLabel)
+        
+        return infoFormLayout
+        
 
     def pathLineEditLayout(self, type):
         hboxlayout = QHBoxLayout()
@@ -1126,6 +1176,29 @@ class MyApp(QWidget):
 
         return hboxlayout, video_path_line_edit, video_push_button
 
+    def getImageFromVideo(self, frame):
+        if not hasattr(self, 'vidcap'):
+            return None
+        self.vidcap.set(cv2.CAP_PROP_POS_FRAMES, frame)
+        success, image = self.vidcap.read()
+        if not success:
+            return None
+
+        return image
+            
+
+    def image2pixmap(self, image):
+        h,w,c = image.shape
+        bpl = 3 * w
+        qimg = QImage(image.data, w, h, bpl, QImage.Format_RGB888).rgbSwapped()
+        pixmap = QPixmap.fromImage(qimg)
+        return pixmap
+    
+    def setResizePolicy(self, label, box):
+        label.resize(box.width(),box.height())
+        label.setScaledContents(True)
+        label.setMinimumSize(1, 1)
+        
     def openVideoFilePath(self,path_line_edit):
         path = QFileDialog.getOpenFileName(self, '','','Video file (*.mp4)')
         # does not select file
@@ -1139,43 +1212,47 @@ class MyApp(QWidget):
             # do something if file extension is not .mp4
             return
 
-        # previewImage = self.getPreviewImage(path[0])
-        #img = Image.fromarray(previewImage)
-
-        #self.input_video_file_path = ""
-
         self.vidcap = cv2.VideoCapture(self.input_video_file_path)
         # get total number of frames
-        self.totalFrames = self.vidcap.get(cv2.CAP_PROP_FRAME_COUNT)
+        self.totalFrames = int(self.vidcap.get(cv2.CAP_PROP_FRAME_COUNT))
         # set frame position
-        self.vidcap.set(cv2.CAP_PROP_POS_FRAMES,self.totalFrames//2)
+       
+        self.input_video_fps = self.vidcap.get(cv2.CAP_PROP_FPS)
+        # Get video duration in seconds
+        self.input_video_duration = self.calculateDuration(self.totalFrames)
+        # Formatting to HH:MM:SS format
+        str_time = self.formattingSec(self.input_video_duration)
+        self.frameRateLabel.setText(str(int(self.input_video_fps)))
+        self.totalFrameLabel.setText(f"{int(self.totalFrames)} ({str_time})")
+        
+
+        self.vidcap.set(cv2.CAP_PROP_POS_FRAMES, self.totalFrames//2)
         success, image = self.vidcap.read()
         if success:
             cv2.imwrite("random_frame.jpg", image)
-        self.input_video_fps = self.vidcap.get(cv2.CAP_PROP_FPS)
-        
-        # Get video duration in seconds
-        self.input_video_duration = self.totalFrames / self.input_video_fps
-        
-        # Formatting to HH:MM:SS format
-        td= timedelta(seconds=self.input_video_duration)
-        hours, remainder = divmod(td.seconds, 3600)
-        minutes, seconds = divmod(remainder, 60)
-        milliseconds = int(td.microseconds / 10000)
-        str_time = "{:02}:{:02}:{:02}:{:02}".format(hours, minutes, seconds, milliseconds)
-        self.totalFrameLabel.setText(f"{int(self.totalFrames)} ({str_time})")
-
-        h,w,c = image.shape
-        bpl = 3 * w
-        qimg = QImage(image.data, w, h, bpl, QImage.Format_RGB888).rgbSwapped()
-        pixmap = QPixmap.fromImage(qimg)
-
+        pixmap = self.image2pixmap(image)
         self.previewImageLabel.setPixmap(pixmap)
+        self.setResizePolicy(self.previewImageLabel, self.previewImageGroupBox)
+        
 
-        self.previewImageLabel.resize(self.previewImageGroupBox.width(),self.previewImageGroupBox.height())
-        self.previewImageLabel.setScaledContents(True)
-        self.previewImageLabel.setMinimumSize(1, 1)
-        self.previewImageContentLayout.addWidget(self.previewImageLabel)
+
+        start_frame_image = self.getImageFromVideo(0)
+        start_frame_pixmap = self.image2pixmap(start_frame_image)
+        self.videoEditorStartFrameLabel.setPixmap(start_frame_pixmap)
+        self.setResizePolicy(self.videoEditorStartFrameLabel, self.videoEditorStartFrameGroupBox)
+        self.startFrameSpinbox.valueChanged.connect(self.startFrameSpinBoxChanged)
+        
+        last_frame_image = self.getImageFromVideo(self.totalFrames-1)
+        last_frame_pixmap = self.image2pixmap(last_frame_image)
+        self.videoEditorLastFrameLabel.setPixmap(last_frame_pixmap)
+        self.setResizePolicy(self.videoEditorLastFrameLabel, self.videoEditorLastFrameGroupBox)
+        self.lastFrameSpinbox.valueChanged.connect(self.lastFrameSpinBoxChanged)
+        
+        self.startFrameSpinbox.setMaximum(self.totalFrames)
+        self.lastFrameSpinbox.setMaximum(self.totalFrames)
+        self.lastFrameSpinbox.setValue(self.totalFrames)
+        self.recalculateFrame()
+        
 
     def runVideoConverter(self):
         if self.input_video_file_path == "" or self.output_video_file_path == "":
@@ -1186,7 +1263,7 @@ class MyApp(QWidget):
         self.progressDialog.show()
         self.progressDialog.canceled.connect(self.stop_conversion)
         
-        self.thread = convertVideoThread(self.input_video_file_path, self.output_video_file_path)
+        self.thread = convertVideoThread(self.input_video_file_path, self.output_video_file_path, self)
         self.thread.update_progress.connect(self.updateProgress)
         self.thread.start()
         self.thread.finished.connect(self.conversion_finished)
@@ -1203,7 +1280,38 @@ class MyApp(QWidget):
     def stop_conversion(self):
         self.thread.stop()
         return
+    
+    def recalculateFrame(self):
+        self.modified_frame = self.lastFrameSpinbox.value() - self.startFrameSpinbox.value() + 1
+        duration = self.calculateDuration(self.modified_frame)
+        self.modifiedFrameLabel.setText(f"{int(self.modified_frame)} ({self.formattingSec(duration)})")
         
+    def calculateDuration(self, frame):
+        return (frame - 1) / self.input_video_fps
+    
+    def startFrameSpinBoxChanged(self, value):
+        self.lastFrameSpinbox.setMinimum(value)
+        start_frame_image = self.getImageFromVideo(value-1)
+        start_frame_pixmap = self.image2pixmap(start_frame_image)
+        self.videoEditorStartFrameLabel.setPixmap(start_frame_pixmap)
+        self.recalculateFrame()
+    
+
+    def lastFrameSpinBoxChanged(self, value):
+        
+        self.startFrameSpinbox.setMaximum(value)
+        last_frame_image = self.getImageFromVideo(value-1)
+        last_frame_pixmap = self.image2pixmap(last_frame_image)
+        self.videoEditorLastFrameLabel.setPixmap(last_frame_pixmap)
+        self.recalculateFrame()
+        
+    def formattingSec(self, sec):
+        td= timedelta(seconds=sec)
+        hours, remainder = divmod(td.seconds, 3600)
+        minutes, seconds = divmod(remainder, 60)
+        milliseconds = int(td.microseconds / 10000)
+        str_time = "{:02}:{:02}:{:02}:{:02}".format(hours, minutes, seconds, milliseconds)
+        return str_time
 
     def saveVideoFilePath(self, path_line_edit):
         path =  QFileDialog.getSaveFileName(self, 'Save file', "","Video file (*.mp4)") 
